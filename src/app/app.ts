@@ -1,146 +1,216 @@
-import { Component, HostListener, signal } from '@angular/core';
+import { Component, HostListener, signal, AfterViewInit, PLATFORM_ID, Inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
   imports: [RouterLink, RouterLinkActive, RouterOutlet],
   template: `
-    <!-- ─── Navigation ─────────────────────────────── -->
+    <!-- ─── Navigation ──────────────────────────────── -->
     <header class="site-header" [class.scrolled]="scrolled()">
       <div class="nav-inner container">
-        <a routerLink="/" class="brand" aria-label="Home">
+        <a routerLink="/home" class="brand" aria-label="Home">
           <span class="brand__title">Yolanda Santa Cruz</span>
           <span class="brand__sub">poet &amp; artist</span>
         </a>
 
-        <button class="nav-toggle" (click)="toggleMenu()" [attr.aria-expanded]="menuOpen()" aria-label="Toggle navigation">
-          <span class="nav-toggle__bar"></span>
-          <span class="nav-toggle__bar"></span>
-          <span class="nav-toggle__bar"></span>
-        </button>
-
         <nav class="site-nav" [class.is-open]="menuOpen()">
           <a routerLink="/home" routerLinkActive="active" (click)="closeMenu()">Home</a>
+          <span class="nav-sep" aria-hidden="true">·</span>
           <a routerLink="/books" routerLinkActive="active" (click)="closeMenu()">Books</a>
-          <a routerLink="/about" routerLinkActive="active" (click)="closeMenu()">About Me</a>
+          <span class="nav-sep" aria-hidden="true">·</span>
+          <a routerLink="/about" routerLinkActive="active" (click)="closeMenu()">About</a>
+          <a href="https://www.instagram.com/lustloveandmemories" target="_blank" rel="noopener" class="nav-ig" aria-label="Instagram">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+              <circle cx="12" cy="12" r="4"/>
+              <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor"/>
+            </svg>
+          </a>
         </nav>
+
+        <button class="nav-toggle" (click)="toggleMenu()" [attr.aria-expanded]="menuOpen()" aria-label="Toggle menu">
+          <span [class.open]="menuOpen()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <line x1="3" y1="6" x2="21" y2="6" class="bar-1"/>
+              <line x1="3" y1="12" x2="21" y2="12" class="bar-2"/>
+              <line x1="3" y1="18" x2="21" y2="18" class="bar-3"/>
+            </svg>
+          </span>
+        </button>
       </div>
     </header>
 
-    <!-- ─── Page Content ───────────────────────────── -->
+    <!-- ─── Page Content ─────────────────────────────── -->
     <main class="site-main">
       <router-outlet />
     </main>
 
-    <!-- ─── Footer ─────────────────────────────────── -->
+    <!-- ─── Footer ───────────────────────────────────── -->
     <footer class="site-footer">
       <div class="container footer-inner">
-        <p class="footer__copy">© {{ year }} Yolanda Santa Cruz · Made with love</p>
-        <a href="https://www.instagram.com/lustloveandmemories" target="_blank" rel="noopener" class="footer__ig" aria-label="Instagram">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
-            <circle cx="12" cy="12" r="4"/>
-            <circle cx="17.5" cy="6.5" r="0.6" fill="currentColor"/>
-          </svg>
-          &#64;lustloveandmemories
-        </a>
+        <div class="footer-brand">
+          <p class="footer-name text-heading">Yolanda Santa Cruz</p>
+          <p class="footer-tagline">confessional poet &amp; artist</p>
+        </div>
+
+        <nav class="footer-nav" aria-label="Footer navigation">
+          <a routerLink="/home">Home</a>
+          <a routerLink="/books">Books</a>
+          <a routerLink="/about">About</a>
+          <a href="https://www.instagram.com/lustloveandmemories" target="_blank" rel="noopener">Instagram</a>
+        </nav>
+
+        <div class="footer-copy">
+          <p>© {{ year }} Yolanda Santa Cruz</p>
+          <p class="footer-made">Made with love &amp; poetry</p>
+        </div>
       </div>
     </footer>
   `,
   styles: `
-    /* ─── Header ─────────────────────────────────────── */
+    /* ─── Header ────────────────────────────────────── */
     .site-header {
-      position: sticky;
+      position: fixed;
       top: 0;
-      z-index: 100;
-      background: var(--color-nav-bg);
-      transition: box-shadow var(--transition-base);
+      left: 0;
+      right: 0;
+      z-index: 200;
+      padding: 0;
+      transition: background var(--dur-med) var(--ease-out),
+                  backdrop-filter var(--dur-med) var(--ease-out),
+                  box-shadow var(--dur-med) var(--ease-out);
     }
 
+    /* Transparent on top of hero */
+    .site-header:not(.scrolled) {
+      background: transparent;
+      backdrop-filter: none;
+    }
+
+    /* Glassmorphism when scrolled */
     .site-header.scrolled {
-      box-shadow: 0 2px 24px rgba(0,0,0,0.3);
+      background: rgba(14, 12, 10, 0.72);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border-bottom: 1px solid rgba(201, 169, 110, 0.12);
+      box-shadow: 0 4px 32px rgba(0,0,0,0.4);
     }
 
     .nav-inner {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      height: 68px;
-      gap: 1rem;
+      height: 72px;
+      gap: 2rem;
     }
 
-    /* ─── Brand ──────────────────────────────────────── */
+    /* ─── Brand ─────────────────────────────────────── */
     .brand {
       display: flex;
       flex-direction: column;
       line-height: 1.1;
-      gap: 0;
-      text-decoration: none;
+      gap: 2px;
+      flex-shrink: 0;
     }
 
     .brand__title {
-      font-family: var(--font-serif);
-      font-size: 1.2rem;
+      font-family: var(--font-display);
+      font-size: 1.15rem;
       font-weight: 400;
-      color: var(--color-nav-text);
+      font-style: italic;
+      color: var(--parchment);
       letter-spacing: 0.01em;
     }
 
     .brand__sub {
-      font-family: var(--font-ui);
-      font-size: 0.65rem;
-      font-weight: 300;
-      letter-spacing: 0.12em;
+      font-family: var(--font-body);
+      font-size: 0.6rem;
+      font-weight: 400;
+      letter-spacing: 0.2em;
       text-transform: uppercase;
-      color: rgba(249,249,249,0.55);
+      color: var(--gold);
+      opacity: 0.8;
     }
 
     /* ─── Nav links ──────────────────────────────────── */
     .site-nav {
       display: flex;
       align-items: center;
-      gap: 0.25rem;
+      gap: 0.4rem;
     }
 
-    .site-nav a {
-      font-family: var(--font-ui);
+    .nav-sep {
+      color: rgba(201,169,110,0.3);
       font-size: 0.8rem;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: rgba(249,249,249,0.75);
-      padding: 0.4em 0.9em;
-      border-radius: var(--radius-full);
-      transition: color var(--transition-base), background var(--transition-base);
+      pointer-events: none;
+      user-select: none;
     }
 
-    .site-nav a:hover,
-    .site-nav a.active {
-      color: #fff;
-      background: rgba(255,255,255,0.1);
+    .site-nav a:not(.nav-ig) {
+      font-family: var(--font-body);
+      font-size: 0.72rem;
+      font-weight: 400;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      padding: 0.35em 0.7em;
+      border-radius: 2px;
+      transition: color var(--dur-fast) ease;
+      position: relative;
+    }
+
+    .site-nav a:not(.nav-ig)::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0.7em;
+      right: 0.7em;
+      height: 1px;
+      background: var(--gold);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform var(--dur-med) var(--ease-out);
+    }
+
+    .site-nav a:not(.nav-ig):hover,
+    .site-nav a:not(.nav-ig).active {
+      color: var(--parchment);
+    }
+
+    .site-nav a:not(.nav-ig):hover::after,
+    .site-nav a:not(.nav-ig).active::after {
+      transform: scaleX(1);
+    }
+
+    .nav-ig {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      margin-left: 0.6rem;
+      transition: all var(--dur-med) var(--ease-out);
+    }
+
+    .nav-ig:hover {
+      color: var(--gold);
+      border-color: var(--gold);
+      background: var(--gold-dim);
     }
 
     /* ─── Hamburger ──────────────────────────────────── */
     .nav-toggle {
       display: none;
-      flex-direction: column;
-      justify-content: center;
-      gap: 5px;
-      width: 36px;
-      height: 36px;
       background: none;
       border: none;
       cursor: pointer;
-      padding: 4px;
-    }
-
-    .nav-toggle__bar {
-      display: block;
-      width: 100%;
-      height: 2px;
-      background: var(--color-nav-text);
-      border-radius: 2px;
-      transition: transform var(--transition-base), opacity var(--transition-base);
+      color: var(--parchment);
+      padding: 0.5rem;
+      line-height: 0;
     }
 
     /* ─── Main ───────────────────────────────────────── */
@@ -150,61 +220,107 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
     /* ─── Footer ─────────────────────────────────────── */
     .site-footer {
-      background: var(--color-nav-bg);
-      color: rgba(249,249,249,0.6);
-      padding: 1.5rem 0;
+      background: var(--ink-soft);
+      border-top: 1px solid var(--border);
+      padding: 3rem 0 2.5rem;
     }
 
     .footer-inner {
-      display: flex;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
       align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 0.75rem;
+      gap: 2rem;
     }
 
-    .footer__copy {
-      font-family: var(--font-ui);
-      font-size: 0.78rem;
-      margin: 0;
+    .footer-name {
+      font-size: 0.82rem;
+      letter-spacing: 0.16em;
+      color: var(--parchment);
+      margin-bottom: 0.35rem;
     }
 
-    .footer__ig {
+    .footer-tagline {
+      font-family: var(--font-body);
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gold);
+      opacity: 0.65;
+    }
+
+    .footer-nav {
       display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 0.45rem;
-      font-family: var(--font-ui);
-      font-size: 0.78rem;
-      color: rgba(249,249,249,0.6);
-      transition: color var(--transition-base);
+      gap: 0.5rem;
     }
 
-    .footer__ig:hover { color: #fff; }
+    .footer-nav a {
+      font-family: var(--font-body);
+      font-size: 0.7rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      transition: color var(--dur-fast) ease;
+    }
 
-    /* ─── Mobile nav ─────────────────────────────────── */
-    @media (max-width: 640px) {
+    .footer-nav a:hover { color: var(--gold); }
+
+    .footer-copy {
+      text-align: right;
+    }
+
+    .footer-copy p {
+      font-family: var(--font-body);
+      font-size: 0.7rem;
+      color: var(--text-tertiary);
+      line-height: 1.6;
+    }
+
+    .footer-made {
+      font-style: italic;
+      color: rgba(201,169,110,0.45) !important;
+    }
+
+    /* ─── Mobile ─────────────────────────────────────── */
+    @media (max-width: 700px) {
       .nav-toggle { display: flex; }
+      .nav-sep    { display: none; }
 
       .site-nav {
         display: none;
-        position: absolute;
-        top: 68px;
+        position: fixed;
+        top: 72px;
         left: 0;
         right: 0;
+        bottom: 0;
         flex-direction: column;
-        align-items: stretch;
-        background: var(--color-nav-bg);
-        padding: 0.75rem 1rem 1.25rem;
-        gap: 0.25rem;
-        border-top: 1px solid rgba(255,255,255,0.08);
+        align-items: center;
+        justify-content: center;
+        gap: 2rem;
+        background: rgba(14,12,10,0.97);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
       }
 
       .site-nav.is-open { display: flex; }
 
-      .site-nav a {
-        padding: 0.7em 1em;
-        border-radius: var(--radius-md);
+      .site-nav a:not(.nav-ig) {
+        font-size: 1.1rem;
+        letter-spacing: 0.2em;
+        padding: 0.5em 1em;
       }
+
+      .nav-ig { display: none; }
+
+      .footer-inner {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+
+      .footer-copy { text-align: center; }
+
+      .footer-nav { flex-direction: row; flex-wrap: wrap; justify-content: center; }
     }
   `,
 })
@@ -213,16 +329,15 @@ export class App {
   readonly scrolled = signal(false);
   readonly menuOpen = signal(false);
 
+  constructor(@Inject(PLATFORM_ID) private platformId: object) {}
+
   @HostListener('window:scroll')
   onScroll() {
-    this.scrolled.set(window.scrollY > 10);
+    if (isPlatformBrowser(this.platformId)) {
+      this.scrolled.set(window.scrollY > 60);
+    }
   }
 
-  toggleMenu() {
-    this.menuOpen.update(v => !v);
-  }
-
-  closeMenu() {
-    this.menuOpen.set(false);
-  }
+  toggleMenu() { this.menuOpen.update(v => !v); }
+  closeMenu()  { this.menuOpen.set(false); }
 }
