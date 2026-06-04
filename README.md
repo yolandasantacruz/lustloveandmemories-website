@@ -1,3 +1,28 @@
 # lustloveandmemories-website
 
 This repository contains the renewed website dedicated to the book series *Lust Love and Memories* by author Yolanda Santa Cruz.
+
+This project was generated with [Analog](https://analogjs.org), the fullstack meta-framework for Angular.
+
+## Setup
+
+Run `pnpm install` to install the application dependencies.
+
+## Development
+
+Run `pnpm start` for a dev server. Navigate to `http://localhost:5173/`. The application automatically reloads if you change any of the source files.
+
+## Build
+
+Run `pnpm run build` to build the client/server project. The client build artifacts are located in the `dist/analog/public` directory. The server for the API build artifacts are located in the `dist/analog/server` directory.
+
+## Test
+
+Run `pnpm run test` to run unit tests with [Vitest](https://vitest.dev).
+
+## Community
+
+- Visit and Star the [GitHub Repo](https://github.com/analogjs/analog)
+- Join the [Discord](https://chat.analogjs.org)
+- Follow us on [Twitter](https://twitter.com/analogjs)
+- Become a [Sponsor](https://github.com/sponsors/brandonroberts)
