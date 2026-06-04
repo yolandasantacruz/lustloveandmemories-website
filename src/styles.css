@@ -1,81 +1,137 @@
-@import 'tailwindcss';
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Gentium+Basic:ital,wght@0,400;0,700;1,400;1,700&family=Open+Sans:wght@300;400;600&display=swap');
 
-/* You can add global styles to this file, and also import other style files */
+/* ─── Design Tokens ─────────────────────────────────────────────────── */
 :root {
-  font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
+  --color-bg: #fffbed;
+  --color-bg-warm: #faf6e8;
+  --color-dark: #1c1c1c;
+  --color-cream: #f9f9f9;
+  --color-text: #1c1c1c;
+  --color-text-muted: rgba(28, 28, 28, 0.55);
+  --color-accent: #8b4513;
+  --color-accent-light: #c0642a;
+  --color-nav-bg: #1c1c1c;
+  --color-nav-text: #f9f9f9;
+  --color-border: rgba(28, 28, 28, 0.12);
+  --color-shadow: rgba(28, 28, 28, 0.08);
+
+  --font-serif: 'EB Garamond', 'Gentium Basic', Georgia, serif;
+  --font-body: 'Gentium Basic', Georgia, serif;
+  --font-ui: 'Open Sans', system-ui, sans-serif;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  --transition-base: 0.25s ease;
+  --transition-slow: 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+
+  --max-width: 1100px;
+  --section-pad: clamp(3rem, 8vw, 6rem);
+
+  font-family: var(--font-body);
   font-size: 16px;
-  line-height: 24px;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
+  line-height: 1.7;
+  color: var(--color-text);
+  background-color: var(--color-bg);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  -webkit-text-size-adjust: 100%;
+  text-rendering: optimizeLegibility;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
+/* ─── Reset ─────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-bg);
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+img { display: block; max-width: 100%; }
+
+h1, h2, h3, h4 {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  margin: 0 0 0.75em;
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
+p { margin: 0 0 1.2em; }
+
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: color var(--transition-base);
+}
+
+/* ─── Utility ────────────────────────────────────────────────────────── */
+.container {
+  width: 100%;
+  max-width: var(--max-width);
+  margin-inline: auto;
+  padding-inline: clamp(1.25rem, 5vw, 3rem);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.65em 1.5em;
+  border-radius: var(--radius-full);
   cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  transition: background var(--transition-base), color var(--transition-base),
+              box-shadow var(--transition-base), transform var(--transition-base);
 }
 
-.card {
-  padding: 2em;
+.btn:active { transform: translateY(1px); }
+
+.btn--dark {
+  background: var(--color-dark);
+  color: var(--color-nav-text);
+  border: 2px solid var(--color-dark);
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+.btn--dark:hover {
+  background: #333;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(28,28,28,0.25);
+  transform: translateY(-1px);
 }
 
-.analog-markdown p {
-  text-align: left;
+.btn--outline {
+  background: transparent;
+  color: var(--color-dark);
+  border: 2px solid var(--color-dark);
+}
+
+.btn--outline:hover {
+  background: var(--color-dark);
+  color: var(--color-nav-text);
+  transform: translateY(-1px);
+}
+
+/* ─── Analog Markdown ────────────────────────────────────────────────── */
+.analog-markdown {
+  font-family: var(--font-body);
+  font-size: 1.08rem;
+  line-height: 1.8;
+  color: var(--color-text);
+}
+
+.analog-markdown p { text-align: left; }
+.analog-markdown em { font-style: italic; }
+.analog-markdown h1, .analog-markdown h2, .analog-markdown h3 {
+  font-family: var(--font-serif);
 }

@@ -3,4 +3,5 @@ export default interface BookAttributes {
   slug: string;
   description: string;
   coverImage: string;
+  orderLink?: string;
 }
