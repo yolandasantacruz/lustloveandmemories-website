@@ -70,3 +70,6 @@ Primary contributor is a product designer. Communicate as a "Technical Design Pa
 ## Rule 8: Framework-Native Capabilities (No Custom Redundancies)
 - **Prefer Built-ins**: Prioritize native Analog and Angular platform features (e.g., built-in prerendering configurations, native sitemap generation, content loaders, standard route handlers) over writing custom node scripts, build hooks, or middleware.
 - **Sitemap Rule**: Sitemaps must be generated using the built-in `sitemap` option within the `prerender` config of `@analogjs/platform` inside `vite.config.ts`, rather than custom HTML scanner/prerender scripts.
+
+## Rule 9: Legacy Site Archive Preservation
+- **Do Not Modify**: The `legacy-site` directory is an archive of the previous website version. You must leave this directory completely untouched. Do not edit, delete, or add files within this folder under any circumstances.

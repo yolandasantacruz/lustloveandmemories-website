@@ -2,6 +2,10 @@
 
 This repository contains the source code for the website [Lust, Love, and Memories](https://www.lustloveandmemories.com), dedicated to the book series by author Yolanda Santa Cruz.
 
+## Legacy Site Archive
+
+> **Note:** The `legacy-site` directory contains an archive of the previous version of the website. It is kept for historical purposes and should remain untouched.
+
 ## The Collection
 
 ### "Lust, Love, and Memories (Volume I)"
