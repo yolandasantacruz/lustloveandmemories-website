@@ -2,10 +2,6 @@
 
 This repository contains the source code for the website [Lust, Love, and Memories](https://www.lustloveandmemories.com), dedicated to the book series by author Yolanda Santa Cruz.
 
-## Legacy Site Archive
-
-> **Note:** The `legacy-site` directory contains an archive of the previous version of the website. It is kept for historical purposes and should remain untouched.
-
 ## The Collection
 
 ### "Lust, Love, and Memories (Volume I)"
@@ -25,34 +21,38 @@ Contact and further work can be explored on Instagram at [@lustloveandmemories](
 
 This project was generated with [Analog](https://analogjs.org), the fullstack meta-framework for Angular.
 
-## Setup
+### Legacy Site Archive
+
+> **Note:** The `legacy-site` directory contains an archive of the previous version of the website. It is kept for historical purposes and should remain untouched.
+
+### Setup
 
 Run `pnpm install` to install the application dependencies.
 
-## Development
+### Development
 
 Run `pnpm start` for a dev server. Navigate to `http://localhost:5173/`. The application automatically reloads if you change any of the source files.
 
-## Build
+### Build
 
 Run `pnpm run build` to build the client/server project. The client build artifacts are located in the `dist/analog/public` directory. The server for the API build artifacts are located in the `dist/analog/server` directory.
 
-## Test
+### Test
 
 This project was generated with [Analog](https://analogjs.org), the fullstack meta-framework for Angular.
 
-## Setup
+### Setup
 
 Run `pnpm install` to install the application dependencies.
 
-## Development
+### Development
 
 Run `pnpm start` for a dev server. Navigate to `http://localhost:5173/`. The application automatically reloads if you change any of the source files.
 
-## Build
+### Build
 
 Run `pnpm run build` to build the client/server project. The client build artifacts are located in the `dist/analog/public` directory. The server for the API build artifacts are located in the `dist/analog/server` directory.
 
-## Test
+### Test
 
 Run `pnpm run test` to run unit tests with [Vitest](https://vitest.dev).
