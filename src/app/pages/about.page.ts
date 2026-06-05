@@ -1,5 +1,5 @@
-import { Component, AfterViewInit, PLATFORM_ID, Inject } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { Component, AfterViewInit, PLATFORM_ID, inject } from '@angular/core';
+import { isPlatformBrowser, DOCUMENT } from '@angular/common';
 
 @Component({
   selector: 'app-about',
@@ -456,13 +456,14 @@ import { isPlatformBrowser } from '@angular/common';
   `,
 })
 export default class About implements AfterViewInit {
-  constructor(@Inject(PLATFORM_ID) private platformId: object) {}
+  private platformId = inject(PLATFORM_ID);
+  private document = inject(DOCUMENT);
 
   ngAfterViewInit() {
     if (!isPlatformBrowser(this.platformId)) return;
 
     // Hero triggers immediately
-    document.querySelectorAll('.about-hero .reveal').forEach(el => el.classList.add('visible'));
+    this.document.querySelectorAll('.about-hero .reveal').forEach(el => el.classList.add('visible'));
 
     const observer = new IntersectionObserver(
       entries => entries.forEach(e => {
@@ -474,7 +475,7 @@ export default class About implements AfterViewInit {
       { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
     );
 
-    document.querySelectorAll('.bio-section .reveal, .gallery-section .reveal, .about-contact .reveal')
+    this.document.querySelectorAll('.bio-section .reveal, .gallery-section .reveal, .about-contact .reveal')
       .forEach(el => observer.observe(el));
   }
 }

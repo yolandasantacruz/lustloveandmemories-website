@@ -1,5 +1,5 @@
-import { Component, HostListener, signal, AfterViewInit, PLATFORM_ID, Inject } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { Component, HostListener, signal, PLATFORM_ID, inject } from '@angular/core';
+import { isPlatformBrowser, DOCUMENT } from '@angular/common';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 @Component({
@@ -328,16 +328,17 @@ export class App {
   readonly year = new Date().getFullYear();
   readonly scrolled = signal(false);
   readonly menuOpen = signal(false);
-
-  constructor(@Inject(PLATFORM_ID) private platformId: object) {}
+  private platformId = inject(PLATFORM_ID);
+  private document = inject(DOCUMENT);
 
   @HostListener('window:scroll')
   onScroll() {
     if (isPlatformBrowser(this.platformId)) {
-      this.scrolled.set(window.scrollY > 60);
+      const windowRef = this.document.defaultView;
+      this.scrolled.set(windowRef ? windowRef.scrollY > 60 : false);
     }
   }
 
   toggleMenu() { this.menuOpen.update(v => !v); }
-  closeMenu()  { this.menuOpen.set(false); }
+  closeMenu() { this.menuOpen.set(false); }
 }

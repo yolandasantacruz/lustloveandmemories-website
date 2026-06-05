@@ -1,0 +1,22 @@
+echo "🔄 Checking Team Library (git remote) for updates..."
+git fetch origin main --quiet 2>/dev/null || true
+
+BEHIND=$(git rev-list HEAD..origin/main --count 2>/dev/null || echo 0)
+if [ "$BEHIND" -gt 0 ]; then
+  echo ""
+  echo "====================================================================="
+  echo "⚠️ Remote Updates Found ⚠️"
+  echo "====================================================================="
+  echo "Your local workspace is behind the main repository by $BEHIND commit(s)."
+  echo "To prevent merge conflicts and divergent branches, please sync your"
+  echo "local 'prototype' with the team library before committing new work:"
+  echo ""
+  echo "👉 Click the 'Sync Changes' button in VS Code Source Control"
+  echo "   OR run: git pull --rebase"
+  echo "====================================================================="
+  echo ""
+  exit 1
+fi
+
+echo "✨ Workspace is in sync. Running pre-flight checks (lint & tests)..."
+HOME="$(pwd)" node_modules/.bin/ng lint && node_modules/.bin/vitest run

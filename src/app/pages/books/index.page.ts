@@ -1,5 +1,5 @@
-import { Component, AfterViewInit, PLATFORM_ID, Inject } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { Component, AfterViewInit, PLATFORM_ID, inject } from '@angular/core';
+import { isPlatformBrowser, DOCUMENT } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { injectContentFiles } from '@analogjs/content';
 
@@ -278,13 +278,13 @@ import BookAttributes from '../../book-attributes';
 })
 export default class Books implements AfterViewInit {
   readonly books = injectContentFiles<BookAttributes>();
-
-  constructor(@Inject(PLATFORM_ID) private platformId: object) {}
+  private platformId = inject(PLATFORM_ID);
+  private document = inject(DOCUMENT);
 
   ngAfterViewInit() {
     if (!isPlatformBrowser(this.platformId)) return;
 
-    document.querySelectorAll('.books-hero .reveal').forEach(el => el.classList.add('visible'));
+    this.document.querySelectorAll('.books-hero .reveal').forEach(el => el.classList.add('visible'));
 
     const observer = new IntersectionObserver(
       entries => entries.forEach(e => {
@@ -296,7 +296,7 @@ export default class Books implements AfterViewInit {
       { threshold: 0.08 }
     );
 
-    document.querySelectorAll('.books-list .reveal, .books-contact .reveal')
+    this.document.querySelectorAll('.books-list .reveal, .books-contact .reveal')
       .forEach(el => observer.observe(el));
   }
 }
