@@ -1,4 +1,4 @@
-import { Component, HostListener, signal, PLATFORM_ID, inject } from '@angular/core';
+import { Component, HostListener, signal, PLATFORM_ID, inject, afterNextRender } from '@angular/core';
 import { isPlatformBrowser, DOCUMENT } from '@angular/common';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
@@ -330,6 +330,32 @@ export class App {
   readonly menuOpen = signal(false);
   private platformId = inject(PLATFORM_ID);
   private document = inject(DOCUMENT);
+
+  constructor() {
+    afterNextRender(() => {
+      const windowRef = this.document.defaultView as unknown as {
+        dataLayer?: unknown[];
+        gtag?: (...args: unknown[]) => void;
+      };
+      if (!windowRef) return;
+
+      // Initialize dataLayer and gtag function
+      const dataLayer = windowRef.dataLayer = windowRef.dataLayer || [];
+      windowRef.gtag = function () {
+        // eslint-disable-next-line prefer-rest-params
+        dataLayer.push(arguments);
+      };
+      windowRef.gtag('js', new Date());
+      windowRef.gtag('config', 'G-Q6G685702D');
+
+      // Dynamically load Google Analytics script with a deprioritized fetch priority
+      const script = this.document.createElement('script');
+      script.async = true;
+      script.src = 'https://www.googletagmanager.com/gtag/js?id=G-Q6G685702D';
+      script.setAttribute('fetchpriority', 'low');
+      this.document.head.appendChild(script);
+    });
+  }
 
   @HostListener('window:scroll')
   onScroll() {
