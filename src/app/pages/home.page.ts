@@ -31,8 +31,8 @@ import { RouterLink } from '@angular/router';
             and heartbreaks I have encountered along the way.
           </p>
           <div class="hero-actions reveal reveal-delay-3">
-            <a routerLink="/books" class="btn btn--gold">Explore my books</a>
-            <a routerLink="/about" class="btn btn--ghost-light">About me</a>
+            <a routerLink="/books" class="btn btn--primary">Explore my books</a>
+            <a routerLink="/about" class="btn btn--ghost">About me</a>
           </div>
         </div>
 
@@ -82,7 +82,7 @@ import { RouterLink } from '@angular/router';
           <!-- Book 1 -->
           <article class="book-card reveal reveal-delay-1">
             <div class="book-card__cover-wrap">
-              <a href="https://www.amazon.com" target="_blank" rel="noopener" class="book-card__cover-link" aria-label="Order Lust, Love, and Memories">
+              <a href="https://www.amazon.com/dp/1736494805" target="_blank" rel="noopener" class="book-card__cover-link" aria-label="Order Lust, Love, and Memories">
                 <img src="/book-lust-love-memories.jpg" alt="Lust, Love, and Memories" class="book-card__cover" />
                 <div class="book-card__cover-glow"></div>
               </a>
@@ -95,14 +95,14 @@ import { RouterLink } from '@angular/router';
                 A compilation of poems that focuses on all stages of romantic relationships — from the desire
                 and excitement felt at the very beginning, to the aftermath of them.
               </p>
-              <a href="https://www.amazon.com" target="_blank" rel="noopener" class="btn btn--outline-gold">Order Book</a>
+              <a href="https://www.amazon.com/dp/1736494805" target="_blank" rel="noopener" class="btn">Order Book</a>
             </div>
           </article>
 
           <!-- Book 2 -->
           <article class="book-card book-card--dark reveal reveal-delay-2">
             <div class="book-card__cover-wrap">
-              <a href="https://www.amazon.com" target="_blank" rel="noopener" class="book-card__cover-link" aria-label="Order The Longest Nights">
+              <a href="https://www.amazon.com/dp/1736494821" target="_blank" rel="noopener" class="book-card__cover-link" aria-label="Order The Longest Nights">
                 <img src="/book-longest-nights.jpg" alt="The Longest Nights" class="book-card__cover" />
                 <div class="book-card__cover-glow book-card__cover-glow--blue"></div>
               </a>
@@ -115,7 +115,7 @@ import { RouterLink } from '@angular/router';
                 A deep dive into the healing journey after experiencing a romantic loss.
                 With each chapter dedicated to the five stages of grief, from denial to acceptance.
               </p>
-              <a href="https://www.amazon.com" target="_blank" rel="noopener" class="btn btn--outline-gold">Order Book</a>
+              <a href="https://www.amazon.com/dp/1736494821" target="_blank" rel="noopener" class="btn">Order Book</a>
             </div>
           </article>
         </div>
@@ -137,7 +137,7 @@ import { RouterLink } from '@angular/router';
               before they get<br/>
               their chance to flourish."
             </blockquote>
-            <a routerLink="/books" class="btn btn--outline-gold" style="margin-top:2rem">Read the books</a>
+            <a routerLink="/books" class="btn" style="margin-top:2rem">Read the books</a>
           </div>
         </div>
       </div>
@@ -152,7 +152,7 @@ import { RouterLink } from '@angular/router';
           Instagram is the best place to reach me. Send me a message and I'll get back to you as soon as I can :D
         </p>
         <a href="https://www.instagram.com/lustloveandmemories" target="_blank" rel="noopener"
-           class="btn btn--gold reveal reveal-delay-3">
+           class="btn btn--primary reveal reveal-delay-3">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
             <rect x="2" y="2" width="20" height="20" rx="5"/>
             <circle cx="12" cy="12" r="4"/>

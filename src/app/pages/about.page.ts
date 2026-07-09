@@ -121,7 +121,7 @@ import { isPlatformBrowser, DOCUMENT } from '@angular/common';
           Instagram is the best place to do so. Just send me a message and I will get back to you as soon as I can :D
         </p>
         <a href="https://www.instagram.com/lustloveandmemories" target="_blank" rel="noopener"
-           class="btn btn--gold reveal reveal-delay-3">
+           class="btn btn--primary reveal reveal-delay-3">
           Get in touch!
         </a>
       </div>
