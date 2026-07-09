@@ -6,10 +6,6 @@ import { isPlatformBrowser, DOCUMENT } from '@angular/common';
   template: `
     <!-- ═══ HERO ════════════════════════════════════════════ -->
     <section class="about-hero">
-      <div class="about-hero__bg" aria-hidden="true">
-        <img src="/poem-flower.jpg" alt="" />
-        <div class="about-hero__overlay"></div>
-      </div>
       <div class="container about-hero__content">
         <div class="about-hero__text reveal">
           <p class="text-label">The Author</p>
