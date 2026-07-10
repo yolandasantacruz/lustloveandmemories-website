@@ -1,17 +1,17 @@
 import { Component, AfterViewInit, PLATFORM_ID, inject } from '@angular/core';
-import { isPlatformBrowser, DOCUMENT } from '@angular/common';
+import { isPlatformBrowser, DOCUMENT, NgOptimizedImage } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-home',
-  imports: [RouterLink],
+  imports: [RouterLink, NgOptimizedImage],
   template: `
     <!-- ═══ HERO ═══════════════════════════════════════════════════ -->
     <section class="hero">
       <!-- Atmospheric background layers -->
       <div class="hero-bg" aria-hidden="true">
         <div class="hero-bg__image">
-          <img src="/travel.jpg" alt="" aria-hidden="true" />
+          <img ngSrc="images/travel.webp" fill alt="" aria-hidden="true" priority />
         </div>
         <div class="hero-bg__gradient"></div>
         <div class="hero-bg__vignette"></div>
@@ -39,7 +39,7 @@ import { RouterLink } from '@angular/router';
         <!-- Author portrait -->
         <div class="hero-portrait reveal reveal-delay-2">
           <div class="hero-portrait__frame">
-            <img src="/author.jpg" alt="Yolanda Santa Cruz" />
+            <img ngSrc="images/author.webp" width="800" height="796" alt="Yolanda Santa Cruz" priority />
           </div>
           <div class="hero-portrait__glow" aria-hidden="true"></div>
         </div>
@@ -84,7 +84,7 @@ import { RouterLink } from '@angular/router';
           <article class="book-card reveal reveal-delay-1">
             <div class="book-card__cover-wrap">
               <a href="/books/lust-love-and-memories" class="book-card__cover-link" aria-label="Order Lust, Love, and Memories">
-                <img src="/book-lust-love-memories.jpg" alt="Lust, Love, and Memories" class="book-card__cover" />
+                <img ngSrc="images/book-lust-love-memories.webp" width="1280" height="1478" alt="Lust, Love, and Memories" class="book-card__cover" ngSrcset="400w, 800w, 1200w" sizes="(max-width: 768px) 100vw, 400px" />
                 <div class="book-card__cover-glow"></div>
               </a>
             </div>
@@ -104,7 +104,7 @@ import { RouterLink } from '@angular/router';
           <article class="book-card book-card--dark reveal reveal-delay-2">
             <div class="book-card__cover-wrap">
               <a href="/books/the-longest-nights" class="book-card__cover-link" aria-label="Order The Longest Nights">
-                <img src="/book-longest-nights.jpg" alt="The Longest Nights" class="book-card__cover" />
+                <img ngSrc="images/book-longest-nights.webp" width="1280" height="1460" alt="The Longest Nights" class="book-card__cover" ngSrcset="400w, 800w, 1200w" sizes="(max-width: 768px) 100vw, 400px" />
                 <div class="book-card__cover-glow book-card__cover-glow--blue"></div>
               </a>
             </div>
@@ -127,9 +127,10 @@ import { RouterLink } from '@angular/router';
     <section class="feature-section">
       <div class="feature-grid">
         <div class="feature-image reveal">
-          <img src="/poem-flower.jpg" alt="poem art" />
+          <img ngSrc="images/poem-flower.webp" width="1130" height="1155" alt="poem art" ngSrcset="400w, 800w, 1200w" sizes="(max-width: 768px) 100vw, 50vw" />
           <div class="feature-image__overlay"></div>
         </div>
+
         <div class="feature-text-wrap">
           <div class="feature-text reveal reveal-delay-1">
             <p class="text-label">From the pages</p>
@@ -471,6 +472,7 @@ import { RouterLink } from '@angular/router';
 
     .book-card__cover {
       width: clamp(140px, 22vw, 220px);
+      height: auto;
       display: block;
       border-radius: 2px;
       box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 4px 20px rgba(0,0,0,0.3);

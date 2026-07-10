@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { AsyncPipe } from '@angular/common';
+import { AsyncPipe, NgOptimizedImage } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { injectContent, MarkdownComponent } from '@analogjs/content';
 
@@ -7,7 +7,7 @@ import BookAttributes from '../../book-attributes';
 
 @Component({
   selector: 'app-book',
-  imports: [AsyncPipe, MarkdownComponent, RouterLink],
+  imports: [AsyncPipe, MarkdownComponent, RouterLink, NgOptimizedImage],
   template: `
     @if (book$ | async; as book) {
       <article class="book-detail">
@@ -28,10 +28,16 @@ import BookAttributes from '../../book-attributes';
             <div class="book-cover-wrap">
               <img
                 class="book-cover"
-                [src]="book.attributes.coverImage"
+                [ngSrc]="book.attributes.coverImage"
                 [alt]="book.attributes.title + ' cover'"
+                width="1280"
+                height="1478"
+                ngSrcset="400w, 800w, 1200w"
+                sizes="(max-width: 768px) 100vw, 400px"
+                priority
               />
             </div>
+
             <div class="book-meta">
               <p class="book-meta__label">poetry collection</p>
               <h1 class="book-meta__title">{{ book.attributes.title }}</h1>
@@ -93,6 +99,7 @@ import BookAttributes from '../../book-attributes';
 
     .book-cover {
       width: 100%;
+      height: auto;
       border-radius: var(--radius-md);
       box-shadow: 0 16px 56px rgba(28,28,28,0.25), 0 4px 16px rgba(28,28,28,0.12);
       display: block;

@@ -1,5 +1,5 @@
 import { Component, AfterViewInit, PLATFORM_ID, inject } from '@angular/core';
-import { isPlatformBrowser, DOCUMENT } from '@angular/common';
+import { isPlatformBrowser, DOCUMENT, NgOptimizedImage } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { injectContentFiles } from '@analogjs/content';
 
@@ -7,21 +7,19 @@ import BookAttributes from '../../book-attributes';
 
 @Component({
   selector: 'app-books',
-  imports: [RouterLink],
+  imports: [RouterLink, NgOptimizedImage],
   template: `
     <!-- ═══ HERO ═══════════════════════════════════════════════ -->
     <section class="books-hero">
       <div class="books-hero__bg" aria-hidden="true">
         <div class="books-hero__pattern"></div>
       </div>
-      <div class="container books-hero__content">
-        <div class="reveal">
-          <p class="text-label">Written Works</p>
-          <h1 class="books-hero__title">
-            <em>Books</em>
-          </h1>
-          <p class="books-hero__sub">Poetry collections by Yolanda Santa Cruz</p>
-        </div>
+      <div class="container books-hero__content reveal">
+        <h1 class="books-title">
+          <em>Poetry</em>
+          <span>Collections</span>
+        </h1>
+        <p class="books-subtitle">Delve into the stages of romance, healing, and memories.</p>
       </div>
     </section>
 
@@ -34,10 +32,13 @@ import BookAttributes from '../../book-attributes';
             <a [routerLink]="['/books', book.attributes.slug]"
                class="book-row__cover-wrap"
                [attr.aria-label]="'Read more about ' + book.attributes.title">
-              <img [src]="book.attributes.coverImage"
+              <img [ngSrc]="book.attributes.coverImage"
                    [alt]="book.attributes.title + ' cover'"
                    class="book-row__cover"
-                   loading="lazy" />
+                   width="1280"
+                   height="1478"
+                   ngSrcset="400w, 800w, 1200w"
+                   sizes="(max-width: 768px) 100vw, 400px" />
               <div class="book-row__cover-shadow"></div>
             </a>
           </div>
@@ -156,6 +157,7 @@ import BookAttributes from '../../book-attributes';
 
     .book-row__cover {
       width: 100%;
+      height: auto;
       border-radius: 2px;
       box-shadow: 0 24px 80px rgba(0,0,0,0.6);
       transition: transform var(--dur-slow) var(--ease-out),

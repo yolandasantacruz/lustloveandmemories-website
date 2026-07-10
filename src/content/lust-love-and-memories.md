@@ -2,7 +2,7 @@
 title: Lust, Love, and Memories
 slug: lust-love-and-memories
 description: A compilation of poems that focuses on all stages of romantic relationships, from the desire and excitement felt at the very beginning, to the aftermath of them.
-coverImage: /book-lust-love-memories.jpg
+coverImage: /images/book-lust-love-memories.webp
 orderLink: https://www.amazon.com/dp/1736494805
 ---
 
