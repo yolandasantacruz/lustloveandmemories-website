@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { AsyncPipe } from '@angular/common';
+import { AsyncPipe, NgOptimizedImage } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { injectContent, MarkdownComponent } from '@analogjs/content';
 
@@ -7,7 +7,7 @@ import BookAttributes from '../../book-attributes';
 
 @Component({
   selector: 'app-book',
-  imports: [AsyncPipe, MarkdownComponent, RouterLink],
+  imports: [AsyncPipe, MarkdownComponent, RouterLink, NgOptimizedImage],
   template: `
     @if (book$ | async; as book) {
       <article class="book-detail">
@@ -28,17 +28,26 @@ import BookAttributes from '../../book-attributes';
             <div class="book-cover-wrap">
               <img
                 class="book-cover"
-                [src]="book.attributes.coverImage"
+                [ngSrc]="book.attributes.coverImage"
                 [alt]="book.attributes.title + ' cover'"
+                width="1280"
+                height="1478"
+                ngSrcset="400w, 800w, 1200w"
+                sizes="(max-width: 768px) 100vw, 400px"
+                priority
               />
             </div>
+
             <div class="book-meta">
               <p class="book-meta__label">poetry collection</p>
               <h1 class="book-meta__title">{{ book.attributes.title }}</h1>
-              <p class="book-meta__author">by Yolanda Santa Cruz</p>
-              <p class="book-meta__desc">{{ book.attributes.description }}</p>
+              
+              <div class="book-meta__markdown">
+                <analog-markdown [content]="book.content" />
+              </div>
+
               @if (book.attributes.orderLink) {
-                <a [href]="book.attributes.orderLink" target="_blank" rel="noopener" class="btn btn--dark order-btn">
+                <a [href]="book.attributes.orderLink" target="_blank" rel="noopener" class="btn btn--primary order-btn">
                   Order Book
                 </a>
               }
@@ -46,48 +55,42 @@ import BookAttributes from '../../book-attributes';
           </div>
         </section>
 
-        <!-- Content -->
-        <section class="book-content">
-          <div class="container book-content-inner">
-            <analog-markdown [content]="book.content" />
-          </div>
-        </section>
+
 
       </article>
     }
   `,
   styles: `
-    .book-detail { background: var(--color-bg); }
+    .book-detail { background: var(--ink); }
 
     /* ─── Back link ────────────────────────────────── */
     .back-link {
       display: inline-flex;
       align-items: center;
       gap: 0.3em;
-      font-family: var(--font-ui);
+      font-family: var(--font-body);
       font-size: 0.8rem;
       font-weight: 600;
       letter-spacing: 0.06em;
       text-transform: uppercase;
-      color: var(--color-text-muted);
-      padding: 1.25rem 0 0;
-      transition: color var(--transition-base);
+      color: var(--text-secondary);
+      padding: calc(72px + 1.25rem) 0 1.25rem;
+      transition: color var(--dur-fast) var(--ease-out);
     }
 
-    .back-link:hover { color: var(--color-dark); }
+    .back-link:hover { color: var(--gold); }
 
     /* ─── Hero ──────────────────────────────────────── */
     .book-hero {
-      background: var(--color-bg-warm);
-      padding: clamp(2rem, 5vw, 4rem) 0 var(--section-pad);
-      border-bottom: 1px solid var(--color-border);
+      background: var(--surface-2);
+      padding: clamp(2rem, 5vw, 4rem) 0 var(--section-v);
+      border-bottom: 1px solid var(--border);
     }
 
     .book-hero-inner {
       display: grid;
       grid-template-columns: 260px 1fr;
       gap: clamp(2.5rem, 5vw, 5rem);
-      align-items: center;
     }
 
     .book-cover-wrap {
@@ -96,6 +99,7 @@ import BookAttributes from '../../book-attributes';
 
     .book-cover {
       width: 100%;
+      height: auto;
       border-radius: var(--radius-md);
       box-shadow: 0 16px 56px rgba(28,28,28,0.25), 0 4px 16px rgba(28,28,28,0.12);
       display: block;
@@ -104,49 +108,38 @@ import BookAttributes from '../../book-attributes';
     .book-meta { display: flex; flex-direction: column; gap: 0.7rem; }
 
     .book-meta__label {
-      font-family: var(--font-ui);
+      font-family: var(--font-body);
       font-size: 0.72rem;
-      font-weight: 600;
+      font-weight: 500;
       letter-spacing: 0.12em;
       text-transform: uppercase;
-      color: var(--color-text-muted);
+      color: var(--gold);
       margin: 0;
     }
 
     .book-meta__title {
-      font-size: clamp(2rem, 4.5vw, 3rem);
-      font-weight: 400;
-      color: var(--color-dark);
+      font-family: var(--font-display);
+      font-style: italic;
+      font-weight: 300;
+      font-size: clamp(2rem, 4.5vw, 3.5rem);
+      line-height: 1.05;
+      color: var(--parchment);
       margin: 0;
     }
 
-    .book-meta__author {
-      font-family: var(--font-ui);
-      font-size: 0.9rem;
-      color: var(--color-text-muted);
-      margin: 0;
-    }
-
-    .book-meta__desc {
+    .book-meta__markdown {
       font-size: 1.05rem;
       line-height: 1.75;
-      color: rgba(28,28,28,0.72);
+      color: var(--text-secondary);
       margin: 0;
       max-width: 54ch;
     }
+    
+    .book-meta__markdown p { margin-bottom: 1em; }
 
-    .order-btn { margin-top: 0.5rem; }
-
-    /* ─── Content ────────────────────────────────────── */
-    .book-content {
-      padding: var(--section-pad) 0;
-    }
-
-    .book-content-inner {
-      max-width: 680px;
-      font-size: 1.08rem;
-      line-height: 1.85;
-      color: rgba(28,28,28,0.8);
+    .order-btn {
+      margin-top: 1rem;
+      align-self: flex-start;
     }
 
     /* ─── Responsive ─────────────────────────────────── */

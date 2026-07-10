@@ -1,15 +1,12 @@
 import { Component, AfterViewInit, PLATFORM_ID, inject } from '@angular/core';
-import { isPlatformBrowser, DOCUMENT } from '@angular/common';
+import { isPlatformBrowser, DOCUMENT, NgOptimizedImage } from '@angular/common';
 
 @Component({
   selector: 'app-about',
+  imports: [NgOptimizedImage],
   template: `
     <!-- ═══ HERO ════════════════════════════════════════════ -->
     <section class="about-hero">
-      <div class="about-hero__bg" aria-hidden="true">
-        <img src="/poem-flower.jpg" alt="" />
-        <div class="about-hero__overlay"></div>
-      </div>
       <div class="container about-hero__content">
         <div class="about-hero__text reveal">
           <p class="text-label">The Author</p>
@@ -27,7 +24,7 @@ import { isPlatformBrowser, DOCUMENT } from '@angular/common';
         <!-- Portrait column -->
         <aside class="bio-portrait reveal">
           <div class="bio-portrait__frame">
-            <img src="/author.jpg" alt="Yolanda Santa Cruz" />
+            <img ngSrc="images/author.webp" width="800" height="796" alt="Yolanda Santa Cruz" priority />
           </div>
           <div class="bio-portrait__caption">
             <p class="text-label">Yolanda Santa Cruz</p>
@@ -85,32 +82,33 @@ import { isPlatformBrowser, DOCUMENT } from '@angular/common';
 
         <div class="gallery-grid">
           <figure class="gallery-item gallery-item--large reveal">
-            <img src="/author.jpg" alt="Yolanda Santa Cruz traveling" loading="lazy" />
+            <img ngSrc="images/author.webp" width="800" height="796" alt="Yolanda Santa Cruz traveling" ngSrcset="400w, 800w, 1200w" sizes="(max-width: 480px) 100vw, (max-width: 992px) 50vw, 33vw" />
             <figcaption>Traveling around the world</figcaption>
           </figure>
           <figure class="gallery-item reveal reveal-delay-1">
-            <img src="/working.jpg" alt="Working at the Mauser Residency" loading="lazy" />
+            <img ngSrc="images/working.webp" width="1170" height="1196" alt="Working at the Mauser Residency" ngSrcset="400w, 800w, 1200w" sizes="(max-width: 480px) 100vw, (max-width: 992px) 50vw, 33vw" />
             <figcaption>Working at the Mauser Residency, Costa Rica</figcaption>
           </figure>
           <figure class="gallery-item reveal reveal-delay-2">
-            <img src="/poem-page.jpg" alt="Poem page from Lust Love and Memories" loading="lazy" />
+            <img ngSrc="images/poem-page.webp" width="1170" height="1196" alt="Poem page from Lust Love and Memories" ngSrcset="400w, 800w, 1200w" sizes="(max-width: 480px) 100vw, (max-width: 992px) 50vw, 33vw" />
             <figcaption>Poem from <em>Lust, Love, and Memories</em></figcaption>
           </figure>
           <figure class="gallery-item reveal reveal-delay-1">
-            <img src="/poem-art.jpg" alt="Poem art" loading="lazy" />
+            <img ngSrc="images/poem-art.webp" width="1122" height="1147" alt="Poem art" ngSrcset="400w, 800w, 1200w" sizes="(max-width: 480px) 100vw, (max-width: 992px) 50vw, 33vw" />
             <figcaption>"Entry as Exit" Poem</figcaption>
           </figure>
           <figure class="gallery-item reveal reveal-delay-2">
-            <img src="/travel.jpg" alt="Travel photography" loading="lazy" />
+            <img ngSrc="images/travel.webp" width="1150" height="1176" alt="Travel photography" ngSrcset="400w, 800w, 1200w" sizes="(max-width: 480px) 100vw, (max-width: 992px) 50vw, 33vw" />
             <figcaption>Somewhere between here and there</figcaption>
           </figure>
           <figure class="gallery-item reveal reveal-delay-3">
-            <img src="/poem-flower.jpg" alt="Poem with flower" loading="lazy" />
+            <img ngSrc="images/poem-flower.webp" width="1130" height="1155" alt="Poem with flower" ngSrcset="400w, 800w, 1200w" sizes="(max-width: 480px) 100vw, (max-width: 992px) 50vw, 33vw" />
             <figcaption>"In the garden of life" Poem</figcaption>
           </figure>
         </div>
       </div>
     </section>
+
 
     <!-- ═══ CONTACT ════════════════════════════════════════════ -->
     <section class="about-contact">
@@ -121,7 +119,7 @@ import { isPlatformBrowser, DOCUMENT } from '@angular/common';
           Instagram is the best place to do so. Just send me a message and I will get back to you as soon as I can :D
         </p>
         <a href="https://www.instagram.com/lustloveandmemories" target="_blank" rel="noopener"
-           class="btn btn--gold reveal reveal-delay-3">
+           class="btn btn--primary reveal reveal-delay-3">
           Get in touch!
         </a>
       </div>

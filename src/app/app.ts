@@ -49,21 +49,8 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
     <!-- ─── Footer ───────────────────────────────────── -->
     <footer class="site-footer">
       <div class="container footer-inner">
-        <div class="footer-brand">
-          <p class="footer-name text-heading">Yolanda Santa Cruz</p>
-          <p class="footer-tagline">confessional poet &amp; artist</p>
-        </div>
-
-        <nav class="footer-nav" aria-label="Footer navigation">
-          <a routerLink="/home">Home</a>
-          <a routerLink="/books">Books</a>
-          <a routerLink="/about">About</a>
-          <a href="https://www.instagram.com/lustloveandmemories" target="_blank" rel="noopener">Instagram</a>
-        </nav>
-
         <div class="footer-copy">
           <p>© {{ year }} Yolanda Santa Cruz</p>
-          <p class="footer-made">Made with love &amp; poetry</p>
         </div>
       </div>
     </footer>
@@ -222,52 +209,17 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
     .site-footer {
       background: var(--ink-soft);
       border-top: 1px solid var(--border);
-      padding: 3rem 0 2.5rem;
+      padding: 2rem 0;
     }
 
     .footer-inner {
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
-      align-items: center;
-      gap: 2rem;
-    }
-
-    .footer-name {
-      font-size: 0.82rem;
-      letter-spacing: 0.16em;
-      color: var(--parchment);
-      margin-bottom: 0.35rem;
-    }
-
-    .footer-tagline {
-      font-family: var(--font-body);
-      font-size: 0.68rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--gold);
-      opacity: 0.65;
-    }
-
-    .footer-nav {
       display: flex;
-      flex-direction: column;
+      justify-content: center;
       align-items: center;
-      gap: 0.5rem;
     }
-
-    .footer-nav a {
-      font-family: var(--font-body);
-      font-size: 0.7rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--text-tertiary);
-      transition: color var(--dur-fast) ease;
-    }
-
-    .footer-nav a:hover { color: var(--gold); }
 
     .footer-copy {
-      text-align: right;
+      text-align: center;
     }
 
     .footer-copy p {
@@ -275,11 +227,6 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
       font-size: 0.7rem;
       color: var(--text-tertiary);
       line-height: 1.6;
-    }
-
-    .footer-made {
-      font-style: italic;
-      color: rgba(201,169,110,0.45) !important;
     }
 
     /* ─── Mobile ─────────────────────────────────────── */
@@ -312,15 +259,6 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
       }
 
       .nav-ig { display: none; }
-
-      .footer-inner {
-        grid-template-columns: 1fr;
-        text-align: center;
-      }
-
-      .footer-copy { text-align: center; }
-
-      .footer-nav { flex-direction: row; flex-wrap: wrap; justify-content: center; }
     }
   `,
 })

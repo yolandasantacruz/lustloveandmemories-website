@@ -1,5 +1,5 @@
 import { Component, AfterViewInit, PLATFORM_ID, inject } from '@angular/core';
-import { isPlatformBrowser, DOCUMENT } from '@angular/common';
+import { isPlatformBrowser, DOCUMENT, NgOptimizedImage } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { injectContentFiles } from '@analogjs/content';
 
@@ -7,21 +7,18 @@ import BookAttributes from '../../book-attributes';
 
 @Component({
   selector: 'app-books',
-  imports: [RouterLink],
+  imports: [RouterLink, NgOptimizedImage],
   template: `
     <!-- ═══ HERO ═══════════════════════════════════════════════ -->
     <section class="books-hero">
       <div class="books-hero__bg" aria-hidden="true">
         <div class="books-hero__pattern"></div>
       </div>
-      <div class="container books-hero__content">
-        <div class="reveal">
-          <p class="text-label">Written Works</p>
-          <h1 class="books-hero__title">
-            <em>Books</em>
-          </h1>
-          <p class="books-hero__sub">Poetry collections by Yolanda Santa Cruz</p>
-        </div>
+      <div class="container books-hero__content reveal">
+        <h1 class="books-title">
+          <em>Books</em>
+        </h1>
+        <p class="books-subtitle">Delve into the stages of romance, healing, and memories.</p>
       </div>
     </section>
 
@@ -34,10 +31,13 @@ import BookAttributes from '../../book-attributes';
             <a [routerLink]="['/books', book.attributes.slug]"
                class="book-row__cover-wrap"
                [attr.aria-label]="'Read more about ' + book.attributes.title">
-              <img [src]="book.attributes.coverImage"
+              <img [ngSrc]="book.attributes.coverImage"
                    [alt]="book.attributes.title + ' cover'"
                    class="book-row__cover"
-                   loading="lazy" />
+                   width="1280"
+                   height="1478"
+                   ngSrcset="400w, 800w, 1200w"
+                   sizes="(max-width: 768px) 100vw, 400px" />
               <div class="book-row__cover-shadow"></div>
             </a>
           </div>
@@ -50,9 +50,9 @@ import BookAttributes from '../../book-attributes';
             <div class="divider" style="margin: 1.25rem 0"></div>
             <p class="book-row__desc">{{ book.attributes.description }}</p>
             <div class="book-row__actions">
-              <a [routerLink]="['/books', book.attributes.slug]" class="btn btn--ghost-light">Read more</a>
+              <a [routerLink]="['/books', book.attributes.slug]" class="btn btn--ghost">Read more</a>
               @if (book.attributes.orderLink) {
-                <a [href]="book.attributes.orderLink" target="_blank" rel="noopener" class="btn btn--gold">Order Book</a>
+                <a [href]="book.attributes.orderLink" target="_blank" rel="noopener" class="btn btn--primary">Order Book</a>
               }
             </div>
           </div>
@@ -104,17 +104,29 @@ import BookAttributes from '../../book-attributes';
       z-index: 1;
     }
 
-    .books-hero__title {
+    .books-title {
       font-family: var(--font-display);
-      font-style: italic;
       font-weight: 300;
-      font-size: clamp(4rem, 10vw, 8rem);
       line-height: 0.9;
       color: var(--parchment);
       margin: 0.5rem 0 1rem;
     }
 
-    .books-hero__sub {
+    .books-title em {
+      display: block;
+      font-style: italic;
+      font-size: clamp(3rem, 7vw, 6rem);
+      color: var(--gold-light);
+    }
+
+    .books-title span {
+      display: block;
+      font-size: clamp(2rem, 5vw, 4rem);
+      font-style: normal;
+      letter-spacing: 0.02em;
+    }
+
+    .books-subtitle {
       font-family: var(--font-body);
       font-size: 0.88rem;
       font-weight: 300;
@@ -156,6 +168,7 @@ import BookAttributes from '../../book-attributes';
 
     .book-row__cover {
       width: 100%;
+      height: auto;
       border-radius: 2px;
       box-shadow: 0 24px 80px rgba(0,0,0,0.6);
       transition: transform var(--dur-slow) var(--ease-out),

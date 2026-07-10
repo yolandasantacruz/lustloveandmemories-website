@@ -1,17 +1,17 @@
 import { Component, AfterViewInit, PLATFORM_ID, inject } from '@angular/core';
-import { isPlatformBrowser, DOCUMENT } from '@angular/common';
+import { isPlatformBrowser, DOCUMENT, NgOptimizedImage } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-home',
-  imports: [RouterLink],
+  imports: [RouterLink, NgOptimizedImage],
   template: `
     <!-- ═══ HERO ═══════════════════════════════════════════════════ -->
     <section class="hero">
       <!-- Atmospheric background layers -->
       <div class="hero-bg" aria-hidden="true">
         <div class="hero-bg__image">
-          <img src="/travel.jpg" alt="" aria-hidden="true" />
+          <img ngSrc="images/travel.webp" fill alt="" aria-hidden="true" priority />
         </div>
         <div class="hero-bg__gradient"></div>
         <div class="hero-bg__vignette"></div>
@@ -31,15 +31,15 @@ import { RouterLink } from '@angular/router';
             and heartbreaks I have encountered along the way.
           </p>
           <div class="hero-actions reveal reveal-delay-3">
-            <a routerLink="/books" class="btn btn--gold">Explore my books</a>
-            <a routerLink="/about" class="btn btn--ghost-light">About me</a>
+            <a routerLink="/books" class="btn btn--primary">Explore my books</a>
+            <a routerLink="/about" class="btn btn--ghost">About me</a>
           </div>
         </div>
 
         <!-- Author portrait -->
         <div class="hero-portrait reveal reveal-delay-2">
           <div class="hero-portrait__frame">
-            <img src="/author.jpg" alt="Yolanda Santa Cruz" />
+            <img ngSrc="images/author.webp" width="800" height="796" alt="Yolanda Santa Cruz" priority />
           </div>
           <div class="hero-portrait__glow" aria-hidden="true"></div>
         </div>
@@ -74,16 +74,17 @@ import { RouterLink } from '@angular/router';
       <div class="container">
         <header class="section-header reveal">
           <p class="text-label">Written Works</p>
-          <h2 class="section-title">Books</h2>
-          <p class="section-sub">Two poetry collections, two journeys through the heart</p>
+          <h2 class="section-title">
+            <a routerLink="/books">Books</a>
+          </h2>
         </header>
 
         <div class="books-grid">
           <!-- Book 1 -->
           <article class="book-card reveal reveal-delay-1">
             <div class="book-card__cover-wrap">
-              <a href="https://www.amazon.com" target="_blank" rel="noopener" class="book-card__cover-link" aria-label="Order Lust, Love, and Memories">
-                <img src="/book-lust-love-memories.jpg" alt="Lust, Love, and Memories" class="book-card__cover" />
+              <a href="/books/lust-love-and-memories" class="book-card__cover-link" aria-label="Order Lust, Love, and Memories">
+                <img ngSrc="images/book-lust-love-memories.webp" width="1280" height="1478" alt="Lust, Love, and Memories" class="book-card__cover" ngSrcset="400w, 800w, 1200w" sizes="(max-width: 768px) 100vw, 400px" />
                 <div class="book-card__cover-glow"></div>
               </a>
             </div>
@@ -95,15 +96,15 @@ import { RouterLink } from '@angular/router';
                 A compilation of poems that focuses on all stages of romantic relationships — from the desire
                 and excitement felt at the very beginning, to the aftermath of them.
               </p>
-              <a href="https://www.amazon.com" target="_blank" rel="noopener" class="btn btn--outline-gold">Order Book</a>
+              <a href="/books/lust-love-and-memories" class="btn">Read more</a>
             </div>
           </article>
 
           <!-- Book 2 -->
           <article class="book-card book-card--dark reveal reveal-delay-2">
             <div class="book-card__cover-wrap">
-              <a href="https://www.amazon.com" target="_blank" rel="noopener" class="book-card__cover-link" aria-label="Order The Longest Nights">
-                <img src="/book-longest-nights.jpg" alt="The Longest Nights" class="book-card__cover" />
+              <a href="/books/the-longest-nights" class="book-card__cover-link" aria-label="Order The Longest Nights">
+                <img ngSrc="images/book-longest-nights.webp" width="1280" height="1460" alt="The Longest Nights" class="book-card__cover" ngSrcset="400w, 800w, 1200w" sizes="(max-width: 768px) 100vw, 400px" />
                 <div class="book-card__cover-glow book-card__cover-glow--blue"></div>
               </a>
             </div>
@@ -115,7 +116,7 @@ import { RouterLink } from '@angular/router';
                 A deep dive into the healing journey after experiencing a romantic loss.
                 With each chapter dedicated to the five stages of grief, from denial to acceptance.
               </p>
-              <a href="https://www.amazon.com" target="_blank" rel="noopener" class="btn btn--outline-gold">Order Book</a>
+              <a href="/books/the-longest-nights" class="btn">Read more</a>
             </div>
           </article>
         </div>
@@ -126,9 +127,10 @@ import { RouterLink } from '@angular/router';
     <section class="feature-section">
       <div class="feature-grid">
         <div class="feature-image reveal">
-          <img src="/poem-flower.jpg" alt="poem art" />
+          <img ngSrc="images/poem-flower.webp" width="1130" height="1155" alt="poem art" ngSrcset="400w, 800w, 1200w" sizes="(max-width: 768px) 100vw, 50vw" />
           <div class="feature-image__overlay"></div>
         </div>
+
         <div class="feature-text-wrap">
           <div class="feature-text reveal reveal-delay-1">
             <p class="text-label">From the pages</p>
@@ -137,7 +139,7 @@ import { RouterLink } from '@angular/router';
               before they get<br/>
               their chance to flourish."
             </blockquote>
-            <a routerLink="/books" class="btn btn--outline-gold" style="margin-top:2rem">Read the books</a>
+            <a routerLink="/books" class="btn" style="margin-top:2rem">Read the books</a>
           </div>
         </div>
       </div>
@@ -152,7 +154,7 @@ import { RouterLink } from '@angular/router';
           Instagram is the best place to reach me. Send me a message and I'll get back to you as soon as I can :D
         </p>
         <a href="https://www.instagram.com/lustloveandmemories" target="_blank" rel="noopener"
-           class="btn btn--gold reveal reveal-delay-3">
+           class="btn reveal reveal-delay-3">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
             <rect x="2" y="2" width="20" height="20" rx="5"/>
             <circle cx="12" cy="12" r="4"/>
@@ -408,6 +410,16 @@ import { RouterLink } from '@angular/router';
       margin-bottom: 0.75rem;
     }
 
+    .section-title a {
+      color: inherit;
+      text-decoration: none;
+      transition: color var(--dur-fast) var(--ease-out);
+    }
+
+    .section-title a:hover {
+      color: var(--gold);
+    }
+
     .section-sub {
       font-family: var(--font-body);
       font-size: 0.88rem;
@@ -460,6 +472,7 @@ import { RouterLink } from '@angular/router';
 
     .book-card__cover {
       width: clamp(140px, 22vw, 220px);
+      height: auto;
       display: block;
       border-radius: 2px;
       box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 4px 20px rgba(0,0,0,0.3);

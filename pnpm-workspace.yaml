@@ -14,11 +14,11 @@ allowBuilds:
   esbuild: true
   lmdb: true
   msgpackr-extract: true
-
+  sharp: true
   # Add other compiled dependencies as needed (e.g., swc, canvas, sharp)
 
-# Block transitive dependencies from pulling in code from untrusted/unverified sources
-# (e.g., raw git URLs, direct tarball downloads). This prevents dependency hijacking.
+  # Block transitive dependencies from pulling in code from untrusted/unverified sources
+  # (e.g., raw git URLs, direct tarball downloads). This prevents dependency hijacking.
 blockExoticSubdeps: true
 
 # Enforce package provenance and trust verification, preventing version downgrades
