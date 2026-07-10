@@ -16,8 +16,7 @@ import BookAttributes from '../../book-attributes';
       </div>
       <div class="container books-hero__content reveal">
         <h1 class="books-title">
-          <em>Poetry</em>
-          <span>Collections</span>
+          <em>Books</em>
         </h1>
         <p class="books-subtitle">Delve into the stages of romance, healing, and memories.</p>
       </div>
@@ -105,17 +104,29 @@ import BookAttributes from '../../book-attributes';
       z-index: 1;
     }
 
-    .books-hero__title {
+    .books-title {
       font-family: var(--font-display);
-      font-style: italic;
       font-weight: 300;
-      font-size: clamp(4rem, 10vw, 8rem);
       line-height: 0.9;
       color: var(--parchment);
       margin: 0.5rem 0 1rem;
     }
 
-    .books-hero__sub {
+    .books-title em {
+      display: block;
+      font-style: italic;
+      font-size: clamp(3rem, 7vw, 6rem);
+      color: var(--gold-light);
+    }
+
+    .books-title span {
+      display: block;
+      font-size: clamp(2rem, 5vw, 4rem);
+      font-style: normal;
+      letter-spacing: 0.02em;
+    }
+
+    .books-subtitle {
       font-family: var(--font-body);
       font-size: 0.88rem;
       font-weight: 300;
