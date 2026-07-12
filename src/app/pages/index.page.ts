@@ -26,9 +26,9 @@ import { RouterLink } from '@angular/router';
             <span class="hero-headline__line2">I'm Yolanda.</span>
           </h1>
           <p class="hero-body reveal reveal-delay-2">
-            I passionately believe in the therapeutic power of art.
-            Through my words, I have documented the evolution of passions
-            and heartbreaks I have encountered along the way.
+            I believe in the therapeutic power of art.
+            Through my words, I have documented the experiences
+            I have lived along the way.
           </p>
           <div class="hero-actions reveal reveal-delay-3">
             <a routerLink="/books" class="btn btn--primary">Explore my books</a>
