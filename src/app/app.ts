@@ -9,13 +9,13 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
     <!-- ─── Navigation ──────────────────────────────── -->
     <header class="site-header" [class.scrolled]="scrolled()">
       <div class="nav-inner container">
-        <a routerLink="/home" class="brand" aria-label="Home">
+        <a routerLink="/" class="brand" aria-label="Home">
           <span class="brand__title">Yolanda Santa Cruz</span>
           <span class="brand__sub">poet &amp; artist</span>
         </a>
 
         <nav class="site-nav" [class.is-open]="menuOpen()">
-          <a routerLink="/home" routerLinkActive="active" (click)="closeMenu()">Home</a>
+          <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="closeMenu()">Home</a>
           <span class="nav-sep" aria-hidden="true">·</span>
           <a routerLink="/books" routerLinkActive="active" (click)="closeMenu()">Books</a>
           <span class="nav-sep" aria-hidden="true">·</span>

@@ -91,7 +91,7 @@ export default defineConfig(({ mode }) => ({
         highlighter: 'prismjs',
       },
       prerender: {
-        routes: ['/home', '/books', '/about', '/books/lust-love-and-memories', '/books/the-longest-nights'],
+        routes: ['/', '/books', '/about', '/books/lust-love-and-memories', '/books/the-longest-nights'],
       },
     }),
     tailwindcss(),
