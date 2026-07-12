@@ -11,7 +11,6 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
       <div class="nav-inner container">
         <a routerLink="/" class="brand" aria-label="Home">
           <span class="brand__title">Yolanda Santa Cruz</span>
-          <span class="brand__sub">poet &amp; artist</span>
         </a>
 
         <nav class="site-nav" [class.is-open]="menuOpen()">
@@ -56,6 +55,12 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
     </footer>
   `,
   styles: `
+    :host {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
     /* ─── Header ────────────────────────────────────── */
     .site-header {
       position: fixed;

@@ -62,7 +62,7 @@ import { RouterLink } from '@angular/router';
     </section>
 
     <!-- ═══ QUOTE INTERLUDE ═════════════════════════════════════════ -->
-    <section class="quote-section">
+    <!-- <section class="quote-section">
       <div class="container">
         <div class="quote-wrap reveal">
           <div class="ornament">✦</div>
@@ -76,7 +76,7 @@ import { RouterLink } from '@angular/router';
           <cite class="quote-attr">— Yolanda Santa Cruz, <em>Lust, Love, and Memories</em></cite>
         </div>
       </div>
-    </section>
+    </section> -->
 
     <!-- ═══ BOOKS ════════════════════════════════════════════════════ -->
     <section class="books-section">
@@ -92,7 +92,7 @@ import { RouterLink } from '@angular/router';
           <!-- Book 1 -->
           <article class="book-card reveal reveal-delay-1">
             <div class="book-card__cover-wrap">
-              <a href="/books/lust-love-and-memories" class="book-card__cover-link" aria-label="Order Lust, Love, and Memories">
+              <a routerLink="/books/lust-love-and-memories" class="book-card__cover-link" aria-label="Order Lust, Love, and Memories">
                 <img ngSrc="images/book-lust-love-memories.webp" width="1280" height="1478" alt="Lust, Love, and Memories" class="book-card__cover" ngSrcset="400w, 800w, 1200w" sizes="(max-width: 768px) 100vw, 400px" />
                 <div class="book-card__cover-glow"></div>
               </a>
@@ -105,14 +105,14 @@ import { RouterLink } from '@angular/router';
                 A compilation of poems that focuses on all stages of romantic relationships — from the desire
                 and excitement felt at the very beginning, to the aftermath of them.
               </p>
-              <a href="/books/lust-love-and-memories" class="btn" aria-label="Read more about Lust, Love, and Memories">Read more</a>
+              <a routerLink="/books/lust-love-and-memories" class="btn" aria-label="Read more about Lust, Love, and Memories">Read more</a>
             </div>
           </article>
 
           <!-- Book 2 -->
           <article class="book-card book-card--dark reveal reveal-delay-2">
             <div class="book-card__cover-wrap">
-              <a href="/books/the-longest-nights" class="book-card__cover-link" aria-label="Order The Longest Nights">
+              <a routerLink="/books/the-longest-nights" class="book-card__cover-link" aria-label="Order The Longest Nights">
                 <img ngSrc="images/book-longest-nights.webp" width="1280" height="1460" alt="The Longest Nights" class="book-card__cover" ngSrcset="400w, 800w, 1200w" sizes="(max-width: 768px) 100vw, 400px" />
                 <div class="book-card__cover-glow book-card__cover-glow--blue"></div>
               </a>
@@ -125,7 +125,7 @@ import { RouterLink } from '@angular/router';
                 A deep dive into the healing journey after experiencing a romantic loss.
                 With each chapter dedicated to the five stages of grief, from denial to acceptance.
               </p>
-              <a href="/books/the-longest-nights" class="btn" aria-label="Read more about The Longest Nights">Read more</a>
+              <a routerLink="/books/the-longest-nights" class="btn" aria-label="Read more about The Longest Nights">Read more</a>
             </div>
           </article>
         </div>
