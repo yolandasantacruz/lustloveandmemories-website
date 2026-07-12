@@ -41,7 +41,9 @@ export const appConfig: ApplicationConfig = {
           manifestKey = 'images/' + manifestKey;
         }
 
-        const availableWidths = OPTIMIZED_IMAGES[manifestKey];
+        const availableWidths = Object.prototype.hasOwnProperty.call(OPTIMIZED_IMAGES, manifestKey)
+          ? OPTIMIZED_IMAGES[manifestKey]
+          : undefined;
 
         // Strip directories for constructing the local public file path
         let fileSrc = src;
