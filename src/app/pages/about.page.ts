@@ -24,7 +24,16 @@ import { isPlatformBrowser, DOCUMENT, NgOptimizedImage } from '@angular/common';
         <!-- Portrait column -->
         <aside class="bio-portrait reveal">
           <div class="bio-portrait__frame">
-            <img ngSrc="images/author.webp" width="800" height="796" alt="Yolanda Santa Cruz" priority />
+            <img
+              src="/images/author-800w.webp"
+              srcset="/images/author-400w.webp 400w, /images/author-800w.webp 800w"
+              sizes="(max-width: 768px) 100vw, 400px"
+              width="800"
+              height="796"
+              alt="Yolanda Santa Cruz"
+              fetchpriority="high"
+              decoding="sync"
+            />
           </div>
           <div class="bio-portrait__caption">
             <p class="text-label">Yolanda Santa Cruz</p>

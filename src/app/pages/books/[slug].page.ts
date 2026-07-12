@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { AsyncPipe, NgOptimizedImage } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { injectContent, MarkdownComponent } from '@analogjs/content';
 
@@ -7,7 +7,7 @@ import BookAttributes from '../../book-attributes';
 
 @Component({
   selector: 'app-book',
-  imports: [AsyncPipe, MarkdownComponent, RouterLink, NgOptimizedImage],
+  imports: [AsyncPipe, MarkdownComponent, RouterLink],
   template: `
     @if (book$ | async; as book) {
       <article class="book-detail">
@@ -28,13 +28,14 @@ import BookAttributes from '../../book-attributes';
             <div class="book-cover-wrap">
               <img
                 class="book-cover"
-                [ngSrc]="book.attributes.coverImage"
+                [src]="book.attributes.coverImage"
                 [alt]="book.attributes.title + ' cover'"
                 width="1280"
                 height="1478"
-                ngSrcset="400w, 800w, 1200w"
+                [srcset]="getSrcset(book.attributes.coverImage)"
                 sizes="(max-width: 768px) 100vw, 400px"
-                priority
+                fetchpriority="high"
+                decoding="sync"
               />
             </div>
 
@@ -161,4 +162,9 @@ import BookAttributes from '../../book-attributes';
 })
 export default class Book {
   readonly book$ = injectContent<BookAttributes>('slug');
+
+  getSrcset(coverImage: string): string {
+    const base = coverImage.replace('.webp', '');
+    return `${base}-400w.webp 400w, ${base}-800w.webp 800w, ${base}-1200w.webp 1200w`;
+  }
 }

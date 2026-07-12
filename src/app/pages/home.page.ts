@@ -11,7 +11,7 @@ import { RouterLink } from '@angular/router';
       <!-- Atmospheric background layers -->
       <div class="hero-bg" aria-hidden="true">
         <div class="hero-bg__image">
-          <img ngSrc="images/travel.webp" fill alt="" aria-hidden="true" priority />
+          <img src="/images/travel.webp" alt="" aria-hidden="true" fetchpriority="high" decoding="sync" />
         </div>
         <div class="hero-bg__gradient"></div>
         <div class="hero-bg__vignette"></div>
@@ -39,7 +39,16 @@ import { RouterLink } from '@angular/router';
         <!-- Author portrait -->
         <div class="hero-portrait reveal reveal-delay-2">
           <div class="hero-portrait__frame">
-            <img ngSrc="images/author.webp" width="800" height="796" alt="Yolanda Santa Cruz" priority />
+            <img
+              src="/images/author-800w.webp"
+              srcset="/images/author-400w.webp 400w, /images/author-800w.webp 800w"
+              sizes="(max-width: 768px) 100vw, 400px"
+              width="800"
+              height="796"
+              alt="Yolanda Santa Cruz"
+              fetchpriority="high"
+              decoding="sync"
+            />
           </div>
           <div class="hero-portrait__glow" aria-hidden="true"></div>
         </div>
@@ -96,7 +105,7 @@ import { RouterLink } from '@angular/router';
                 A compilation of poems that focuses on all stages of romantic relationships — from the desire
                 and excitement felt at the very beginning, to the aftermath of them.
               </p>
-              <a href="/books/lust-love-and-memories" class="btn">Read more</a>
+              <a href="/books/lust-love-and-memories" class="btn" aria-label="Read more about Lust, Love, and Memories">Read more</a>
             </div>
           </article>
 
@@ -116,7 +125,7 @@ import { RouterLink } from '@angular/router';
                 A deep dive into the healing journey after experiencing a romantic loss.
                 With each chapter dedicated to the five stages of grief, from denial to acceptance.
               </p>
-              <a href="/books/the-longest-nights" class="btn">Read more</a>
+              <a href="/books/the-longest-nights" class="btn" aria-label="Read more about The Longest Nights">Read more</a>
             </div>
           </article>
         </div>

@@ -225,7 +225,7 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
     .footer-copy p {
       font-family: var(--font-body);
       font-size: 0.7rem;
-      color: var(--text-tertiary);
+      color: var(--text-secondary);
       line-height: 1.6;
     }
 
