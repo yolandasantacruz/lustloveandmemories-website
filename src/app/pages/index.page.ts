@@ -28,7 +28,7 @@ import { RouterLink } from '@angular/router';
           <p class="hero-body reveal reveal-delay-2">
             I believe in the therapeutic power of art.
             Through my words, I have documented the experiences
-            I have lived along the way.
+            I have had along the way.
           </p>
           <div class="hero-actions reveal reveal-delay-3">
             <a routerLink="/books" class="btn btn--primary">Explore my books</a>
