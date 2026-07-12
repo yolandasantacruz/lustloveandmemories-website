@@ -105,7 +105,9 @@ import { RouterLink } from '@angular/router';
                 A compilation of poems that focuses on all stages of romantic relationships — from the desire
                 and excitement felt at the very beginning, to the aftermath of them.
               </p>
-              <a routerLink="/books/lust-love-and-memories" class="btn" aria-label="Read more about Lust, Love, and Memories">Read more</a>
+              <a routerLink="/books/lust-love-and-memories" class="btn">
+                Read more <span class="sr-only">about Lust, Love, and Memories</span>
+              </a>
             </div>
           </article>
 
@@ -125,7 +127,9 @@ import { RouterLink } from '@angular/router';
                 A deep dive into the healing journey after experiencing a romantic loss.
                 With each chapter dedicated to the five stages of grief, from denial to acceptance.
               </p>
-              <a routerLink="/books/the-longest-nights" class="btn" aria-label="Read more about The Longest Nights">Read more</a>
+              <a routerLink="/books/the-longest-nights" class="btn">
+                Read more <span class="sr-only">about The Longest Nights</span>
+              </a>
             </div>
           </article>
         </div>

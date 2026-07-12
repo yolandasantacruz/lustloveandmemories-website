@@ -92,6 +92,9 @@ export default defineConfig(({ mode }) => ({
       },
       prerender: {
         routes: ['/', '/books', '/about', '/books/lust-love-and-memories', '/books/the-longest-nights'],
+        sitemap: {
+          host: 'https://lustloveandmemories.com',
+        },
       },
     }),
     tailwindcss(),

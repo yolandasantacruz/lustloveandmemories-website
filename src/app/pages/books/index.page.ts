@@ -50,7 +50,9 @@ import BookAttributes from '../../book-attributes';
             <div class="divider" style="margin: 1.25rem 0"></div>
             <p class="book-row__desc">{{ book.attributes.description }}</p>
             <div class="book-row__actions">
-              <a [routerLink]="['/books', book.attributes.slug]" class="btn btn--ghost">Read more</a>
+              <a [routerLink]="['/books', book.attributes.slug]" class="btn btn--ghost">
+                Read more <span class="sr-only">about {{ book.attributes.title }}</span>
+              </a>
               @if (book.attributes.orderLink) {
                 <a [href]="book.attributes.orderLink" target="_blank" rel="noopener" class="btn btn--primary">Order Book</a>
               }
