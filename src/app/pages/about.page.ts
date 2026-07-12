@@ -90,10 +90,6 @@ import { isPlatformBrowser, DOCUMENT, NgOptimizedImage } from '@angular/common';
         </header>
 
         <div class="gallery-grid">
-          <figure class="gallery-item gallery-item--large reveal">
-            <img ngSrc="images/author.webp" width="800" height="796" alt="Yolanda Santa Cruz traveling" ngSrcset="400w, 800w, 1200w" sizes="(max-width: 480px) 100vw, (max-width: 992px) 50vw, 33vw" />
-            <figcaption>Traveling around the world</figcaption>
-          </figure>
           <figure class="gallery-item reveal reveal-delay-1">
             <img ngSrc="images/working.webp" width="1170" height="1196" alt="Working at the Mauser Residency" ngSrcset="400w, 800w, 1200w" sizes="(max-width: 480px) 100vw, (max-width: 992px) 50vw, 33vw" />
             <figcaption>Working at the Mauser Residency, Costa Rica</figcaption>
