@@ -314,6 +314,7 @@ import {
     .sec {
       padding: clamp(5rem, 10vh, 8.5rem) 0;
       position: relative;
+      scroll-margin-top: 64px;
     }
 
     /* ─── 1. HERO ─────────────────────────────────────────────────── */

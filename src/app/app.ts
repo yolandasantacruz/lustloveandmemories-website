@@ -1,19 +1,20 @@
 import { Component, HostListener, signal, PLATFORM_ID, inject, afterNextRender, ChangeDetectionStrategy } from '@angular/core';
 import { isPlatformBrowser, DOCUMENT } from '@angular/common';
-import { RouterLink, RouterLinkActive, RouterOutlet, Router } from '@angular/router';
+import { RouterLink, RouterOutlet, Router } from '@angular/router';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterLink, RouterLinkActive, RouterOutlet],
+  imports: [RouterLink, RouterOutlet],
   template: `
     <!-- ─── Navigation ──────────────────────────────── -->
-    <header class="site-header" [class.scrolled]="scrolled()" [class.nav--hidden]="navHidden()">
+    <header class="site-header" [class.scrolled]="scrolled()" [class.nav--hidden]="navHidden() && !menuOpen()">
       <div class="nav-inner">
         <a routerLink="/" class="brand" aria-label="Home" (click)="scrollTo('top', $event)">
           <span class="brand__title">Yolanda Santa Cruz</span>
         </a>
 
-        <nav class="site-nav" [class.is-open]="menuOpen()">
+        <!-- Desktop Navigation -->
+        <nav class="site-nav site-nav--desktop" aria-label="Primary Navigation">
           <a href="#" [class.active]="activeSection() === 'top'" (click)="scrollTo('top', $event)">Home</a>
           <span class="nav-sep" aria-hidden="true">·</span>
           <a href="#works" [class.active]="activeSection() === 'works'" (click)="scrollTo('works', $event)">Books</a>
@@ -21,8 +22,13 @@ import { RouterLink, RouterLinkActive, RouterOutlet, Router } from '@angular/rou
           <a href="#author" [class.active]="activeSection() === 'author'" (click)="scrollTo('author', $event)">About</a>
         </nav>
 
-        <button class="nav-toggle" (click)="toggleMenu()" [attr.aria-expanded]="menuOpen()" aria-label="Toggle menu">
-          <span [class.open]="menuOpen()">
+        <button
+          class="nav-toggle"
+          (click)="toggleMenu()"
+          [attr.aria-expanded]="menuOpen()"
+          aria-label="Toggle navigation menu"
+        >
+          <span class="toggle-icon" [class.open]="menuOpen()">
             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
               <line x1="3" y1="6" x2="21" y2="6" class="bar-1"/>
               <line x1="3" y1="12" x2="21" y2="12" class="bar-2"/>
@@ -32,6 +38,46 @@ import { RouterLink, RouterLinkActive, RouterOutlet, Router } from '@angular/rou
         </button>
       </div>
     </header>
+
+    <!-- ─── Mobile Sidebar Navigation ───────────────── -->
+    <!-- Scrim Backdrop (tap outside to close) -->
+    <div
+      class="mobile-backdrop"
+      [class.is-open]="menuOpen()"
+      (click)="closeMenu()"
+      aria-hidden="true"
+    ></div>
+
+    <!-- Slideout Sidebar (from right to left, takes less than half screen) -->
+    <aside
+      class="mobile-sidebar"
+      [class.is-open]="menuOpen()"
+      [attr.aria-hidden]="!menuOpen()"
+      aria-label="Mobile Navigation"
+    >
+      <div class="sidebar-inner">
+        <nav class="sidebar-nav">
+          <a
+            href="#"
+            class="sidebar-link"
+            [class.active]="activeSection() === 'top'"
+            (click)="scrollTo('top', $event)"
+          >Home</a>
+          <a
+            href="#works"
+            class="sidebar-link"
+            [class.active]="activeSection() === 'works'"
+            (click)="scrollTo('works', $event)"
+          >Books</a>
+          <a
+            href="#author"
+            class="sidebar-link"
+            [class.active]="activeSection() === 'author'"
+            (click)="scrollTo('author', $event)"
+          >About</a>
+        </nav>
+      </div>
+    </aside>
 
     <!-- ─── Page Content ─────────────────────────────── -->
     <main class="site-main">
@@ -82,7 +128,7 @@ import { RouterLink, RouterLinkActive, RouterOutlet, Router } from '@angular/rou
       top: 0;
       left: 0;
       right: 0;
-      z-index: 200;
+      z-index: 230;
       padding: 0;
       transform: translateY(0);
       transition: transform 0.36s cubic-bezier(0.16, 1, 0.3, 1),
@@ -233,6 +279,41 @@ import { RouterLink, RouterLinkActive, RouterOutlet, Router } from '@angular/rou
       color: var(--ink);
       padding: 0.5rem;
       line-height: 0;
+      z-index: 202;
+    }
+
+    .nav-toggle .toggle-icon {
+      display: block;
+      line-height: 0;
+    }
+
+    .nav-toggle .bar-1,
+    .nav-toggle .bar-2,
+    .nav-toggle .bar-3 {
+      transform-origin: center;
+      transition: transform 0.26s cubic-bezier(0.16, 1, 0.3, 1),
+                  opacity 0.2s ease;
+    }
+
+    .nav-toggle .toggle-icon.open .bar-1 {
+      transform: translateY(6px) rotate(45deg);
+    }
+
+    .nav-toggle .toggle-icon.open .bar-2 {
+      opacity: 0;
+    }
+
+    .nav-toggle .toggle-icon.open .bar-3 {
+      transform: translateY(-6px) rotate(-45deg);
+    }
+
+    /* ─── Mobile Sidebar & Backdrop ──────────────────── */
+    .mobile-backdrop {
+      display: none;
+    }
+
+    .mobile-sidebar {
+      display: none;
     }
 
     /* ─── Main ───────────────────────────────────────── */
@@ -343,32 +424,112 @@ import { RouterLink, RouterLinkActive, RouterOutlet, Router } from '@angular/rou
     @media (max-width: 700px) {
       .nav-toggle { display: flex; }
       .nav-sep    { display: none; }
+      .site-nav--desktop { display: none; }
 
-      .site-nav {
-        display: none;
+      .mobile-backdrop {
+        display: block;
         position: fixed;
-        top: 72px;
-        left: 0;
+        inset: 0;
+        z-index: 210;
+        background: rgba(20, 19, 18, 0.25);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.32s var(--ease-out), visibility 0.32s;
+      }
+
+      .mobile-backdrop.is-open {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+      }
+
+      .mobile-sidebar {
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        top: 0;
         right: 0;
         bottom: 0;
+        width: clamp(170px, 45vw, 215px);
+        max-width: 47vw;
+        height: 100vh;
+        height: 100dvh;
+        z-index: 220;
+        background: rgba(248, 247, 243, 0.96);
+        backdrop-filter: blur(24px) saturate(160%);
+        -webkit-backdrop-filter: blur(24px) saturate(160%);
+        border-left: 1px solid var(--rule);
+        box-shadow: -10px 0 35px rgba(20, 19, 18, 0.10);
+        transform: translateX(100%);
+        visibility: hidden;
+        pointer-events: none;
+        transition: transform 0.34s cubic-bezier(0.16, 1, 0.3, 1),
+                    visibility 0.34s;
+        will-change: transform;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+      }
+
+      .mobile-sidebar.is-open {
+        transform: translateX(0);
+        visibility: visible;
+        pointer-events: auto;
+      }
+
+      .sidebar-inner {
+        display: flex;
         flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 2rem;
-        background: rgba(14,12,10,0.97);
-        backdrop-filter: blur(24px);
-        -webkit-backdrop-filter: blur(24px);
+        height: 100%;
+        padding: 5rem 1.25rem 2.5rem 1.5rem;
       }
 
-      .site-nav.is-open { display: flex; }
-
-      .site-nav a:not(.nav-ig) {
-        font-size: 1.1rem;
-        letter-spacing: 0.2em;
-        padding: 0.5em 1em;
+      .sidebar-nav {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1.25rem;
       }
 
-      .nav-ig { display: none; }
+      .sidebar-link {
+        font-family: var(--font-body);
+        font-size: 1.15rem;
+        font-weight: 450;
+        letter-spacing: 0.02em;
+        text-transform: none;
+        color: var(--ink-2);
+        padding: 0.35rem 0.55rem;
+        border-radius: 2px;
+        transition: color var(--dur-fast) ease;
+        position: relative;
+        text-decoration: none;
+        display: inline-block;
+      }
+
+      .sidebar-link::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0.55rem;
+        right: 0.55rem;
+        height: 1px;
+        background: var(--ink);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform var(--dur-med) var(--ease-out);
+      }
+
+      .sidebar-link:hover,
+      .sidebar-link.active {
+        color: var(--ink);
+      }
+
+      .sidebar-link:hover::after,
+      .sidebar-link.active::after {
+        transform: scaleX(1);
+      }
     }
   `,
 })
@@ -407,6 +568,13 @@ export class App {
       script.setAttribute('fetchpriority', 'low');
       this.document.head.appendChild(script);
     });
+  }
+
+  @HostListener('window:keydown.escape')
+  onEscape() {
+    if (this.menuOpen()) {
+      this.closeMenu();
+    }
   }
 
   @HostListener('window:scroll')
@@ -484,6 +652,27 @@ export class App {
     }
   }
 
-  toggleMenu() { this.menuOpen.update(v => !v); }
-  closeMenu() { this.menuOpen.set(false); }
+  toggleMenu() {
+    this.menuOpen.update(v => {
+      const next = !v;
+      this.syncBodyScrollLock(next);
+      return next;
+    });
+  }
+
+  closeMenu() {
+    if (this.menuOpen()) {
+      this.menuOpen.set(false);
+      this.syncBodyScrollLock(false);
+    }
+  }
+
+  private syncBodyScrollLock(lock: boolean) {
+    if (!isPlatformBrowser(this.platformId)) return;
+    const body = this.document.body;
+    if (body) {
+      body.style.overflow = lock ? 'hidden' : '';
+    }
+  }
 }
+
