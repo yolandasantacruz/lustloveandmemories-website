@@ -9,7 +9,7 @@ import {
   ChangeDetectionStrategy
 } from '@angular/core';
 import { isPlatformBrowser, DOCUMENT, NgOptimizedImage } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import {
   initLetterSea,
   initHeroFigure,
@@ -698,8 +698,8 @@ import {
     .reveal-wrap {
       position: relative;
       width: 100%;
-      max-width: 880px;
-      min-height: 330px;
+      max-width: 960px;
+      min-height: 350px;
       margin: 0 auto;
       padding: 0.5rem 1rem 1.35rem;
       background: radial-gradient(
@@ -712,9 +712,9 @@ import {
 
     .reveal-canvas {
       width: 100%;
-      height: clamp(300px, 36vw, 370px);
-      cursor: url('/images/quill-cursor.png') 0 37, crosshair;
-      cursor: -webkit-image-set(url('/images/quill-cursor.png') 1x, url('/images/quill-cursor@2x.png') 2x) 0 37, url('/images/quill-cursor.png') 0 37, crosshair;
+      height: clamp(320px, 38vw, 400px);
+      cursor: url('/images/quill-cursor.png') 0 52, crosshair;
+      cursor: -webkit-image-set(url('/images/quill-cursor.png') 1x, url('/images/quill-cursor@2x.png') 2x) 0 52, url('/images/quill-cursor.png') 0 52, crosshair;
       display: block;
     }
 
@@ -888,6 +888,7 @@ import {
 export default class HomeComponent {
   private platformId = inject(PLATFORM_ID);
   private document = inject(DOCUMENT);
+  private router = inject(Router);
 
   seaCanvas = viewChild<ElementRef<HTMLCanvasElement>>('seaCanvas');
   shapesSection = viewChild<ElementRef<HTMLElement>>('shapesSection');
@@ -936,7 +937,9 @@ export default class HomeComponent {
       // 4. Initialize Revealing Poetry Canvas
       const cvRev = this.revealCanvas()?.nativeElement;
       if (cvRev) {
-        initRevealingPoem(cvRev, CURATED_POEMS, prefersRM, '#141312');
+        initRevealingPoem(cvRev, CURATED_POEMS, prefersRM, '#141312', (url) => {
+          this.router.navigateByUrl(url);
+        });
       }
 
       // 5. Initialize Walking Text Figure in Correspondence section

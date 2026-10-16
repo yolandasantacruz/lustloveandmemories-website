@@ -80,12 +80,12 @@ async function processQuill() {
     }
   }
 
-  // Target sizes:
-  // Cursor size ~38px height
+  // Target sizes scaled 1.4x:
+  // Cursor size ~53px height (was 38px * 1.4)
   const cursorImg = await sharp(croppedData, {
     raw: { width: cropW, height: cropH, channels: 4 }
   })
-    .resize({ height: 38, fit: 'inside' })
+    .resize({ height: 53, fit: 'inside' })
     .png()
     .toBuffer({ resolveWithObject: true });
 
@@ -93,11 +93,11 @@ async function processQuill() {
   fs.writeFileSync(finalOutPath, cursorImg.data);
   console.log(`Saved cursor: ${finalOutPath} (${cursorImg.info.width}x${cursorImg.info.height})`);
 
-  // Retina 2x cursor ~76px height
+  // Retina 2x cursor ~106px height (was 76px * 1.4)
   const retinaCursor = await sharp(croppedData, {
     raw: { width: cropW, height: cropH, channels: 4 }
   })
-    .resize({ height: 76, fit: 'inside' })
+    .resize({ height: 106, fit: 'inside' })
     .png()
     .toBuffer({ resolveWithObject: true });
 
