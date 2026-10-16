@@ -10,4 +10,4 @@ The Longest Nights dissects the grieving we go through when we experience a roma
 
 With each chapter dedicated to the five most renowned stages of grieving, you will encounter here poems that range from complete denial of the present, to the acceptance that comes only after you make peace with the past.
 
-This is a book about the dark hours — those long, sleepless stretches where emotion is most honest. But it is also, ultimately, a book about survival and the quiet strength that emerges on the other side of heartbreak.
+This is a book about the dark hours — those long, sleepless stretches where emotion is most honest. But it is also, ultimately, a book about healing and the quiet strength that emerges on the other side of heartbreak.

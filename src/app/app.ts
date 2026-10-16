@@ -45,7 +45,7 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
           <div class="footer-col footer-col--brand">
             <span class="footer-brand">Yolanda Santa Cruz</span>
             <p class="footer-tagline text-serif-italic">
-              Poet and artist. Exploring love, heartbreak, and quiet healing through intimate verse and typographic art.
+              Poet and artist exploring the spectrum of intimacy within relationships.
             </p>
           </div>
 

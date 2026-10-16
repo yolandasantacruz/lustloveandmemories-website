@@ -37,10 +37,10 @@ import {
         <div class="hero-lead">
           <span class="kicker text-sc">Two Poetry Collections</span>
           <h1 id="heroTitle" class="hero-headline live">
-            &ldquo;Whenever I want to write you, I write me.&rdquo;
+            Writing about Lust, Love, and Memories
           </h1>
           <p class="hero-sub text-serif-italic">
-            Poetry on desire, grief, and surviving the quiet hours.
+            Poetry on desire, connection, and the aftermath of relationships.
           </p>
           <div class="hero-actions">
             <a href="#works" class="btn">Explore Collections</a>
@@ -54,9 +54,6 @@ import {
       <div class="container center-head">
         <span class="kicker text-sc">Published Collections</span>
         <h2 id="worksH" class="sec-title live">The Books</h2>
-        <p class="sec-desc text-serif-italic">
-          Two companion volumes exploring romantic desire, loss, and survival.
-        </p>
       </div>
 
       <div class="container books-sequential">
@@ -82,7 +79,7 @@ import {
               Lust, Love, and Memories
             </h3>
             <p class="book-desc">
-              A compilation of poems focusing on all stages of romantic relationships, from the desire and excitement felt at the very beginning to the quiet aftermath that follows. Each piece captures an emotional landscape of longing, connection, and honest survival.
+              A compilation of poems that focuses on all stages of romantic relationships, from the desire and excitement felt at the very beginning, to the aftermath of them.
             </p>
             <div class="book-links">
               <a href="https://www.amazon.com/dp/1736494805" target="_blank" rel="noopener" class="btn">Order Book</a>
@@ -112,13 +109,36 @@ import {
               The Longest Nights
             </h3>
             <p class="book-desc">
-              Dissects the grieving we go through after romantic loss, with each chapter dedicated to the five stages of grief. Encounter poems that move from denial of the present to the acceptance that comes only after making peace with the past.
+              A deep dive into the healing journey after experiencing a romantic loss, with each chapter dedicated to the five stages of grief.
             </p>
             <div class="book-links">
               <a href="https://www.amazon.com/dp/1736494821" target="_blank" rel="noopener" class="btn">Order Book</a>
             </div>
           </div>
         </article>
+      </div>
+    </section>
+
+    <!-- ═══ 3. SHAPES IN TEXT (TRANSPARENT TYPOGRAPHIC SILHOUETTES) ═════ -->
+    <section class="sec shapes-section" id="shapes" aria-labelledby="shapesH" #shapesSection>
+      <div class="container shapes-grid">
+        <div class="shapes-copy">
+          <span class="kicker text-sc">Metamorphosis</span>
+          <h2 id="shapesH" class="sec-title live">Shapes in text</h2>
+          <p class="shapes-main">
+            Letters gathering into silhouettes shaped by memory.
+          </p>
+          <p class="shapes-sub text-serif-italic" #figCaption aria-live="polite">
+            Tap the figure to rearrange its verses.
+          </p>
+        </div>
+
+        <div class="shapes-canvas-col">
+          <div class="shapes-frame">
+            <canvas #figCanvas class="fig-canvas" aria-hidden="true"></canvas>
+            <button #figBtn type="button" class="fig-btn" aria-label="Rearrange letters into a new figure"></button>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -141,7 +161,7 @@ import {
         <div class="author-text">
           <span class="kicker text-sc">The Author</span>
           <h2 id="authorH" class="sec-title live">
-            Behind the Verse
+            Behind the Letters
           </h2>
           <div class="author-statement">
             <p class="author-summary">
@@ -153,29 +173,6 @@ import {
             <div class="author-meta">
               <a routerLink="/about" class="text-link">Biography &amp; Publications</a>
             </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ═══ 5. SHAPES IN TEXT (TRANSPARENT TYPOGRAPHIC SILHOUETTES) ═════ -->
-    <section class="sec shapes-section" id="shapes" aria-labelledby="shapesH" #shapesSection>
-      <div class="container shapes-grid">
-        <div class="shapes-copy">
-          <span class="kicker text-sc">Metamorphosis</span>
-          <h2 id="shapesH" class="sec-title live">Shapes in text</h2>
-          <p class="shapes-main">
-            Letters gathering into silhouettes shaped by memory.
-          </p>
-          <p class="shapes-sub text-serif-italic" #figCaption aria-live="polite">
-            Tap the figure to rearrange its verses.
-          </p>
-        </div>
-
-        <div class="shapes-canvas-col">
-          <div class="shapes-frame">
-            <canvas #figCanvas class="fig-canvas" aria-hidden="true"></canvas>
-            <button #figBtn type="button" class="fig-btn" aria-label="Rearrange letters into a new figure"></button>
           </div>
         </div>
       </div>
@@ -577,10 +574,14 @@ import {
       z-index: 1;
     }
 
+    .works-section .center-head {
+      margin-bottom: calc(clamp(2.5rem, 5vw, 4rem) + 20px);
+    }
+
     .books-sequential {
       display: flex;
       flex-direction: column;
-      gap: clamp(7.5rem, 16vh, 12rem);
+      gap: calc(clamp(7.5rem, 16vh, 12rem) + 20px);
     }
 
     .book-feature {
