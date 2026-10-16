@@ -17,7 +17,7 @@ import {
   CURATED_POEMS,
   initWalkingFigure,
   setupLiveLetters
-} from './literary-art';
+} from '../literary-art';
 
 @Component({
   selector: 'app-home',
