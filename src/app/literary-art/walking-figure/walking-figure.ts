@@ -2,6 +2,28 @@ import { WALKER, getWalkerOps } from './walker.data';
 import { drawOps } from '../morphing-shapes/shape-packer';
 import { clamp, getDpr, NOOP } from '../common/math';
 
+export interface TrailConfig {
+  letterDelay: number;
+  wordDelay: number;
+  duration: number;
+  baseArch: number;
+  waveAmp: number;
+  waveFreq: number;
+  riseDrift: number;
+  fontSize: number;
+}
+
+export const TRAIL_CONFIG: TrailConfig = {
+  letterDelay: 70,      // Milliseconds between letters (higher = more separate)
+  wordDelay: 130,       // Milliseconds for word spaces (distinct word separation)
+  duration: 5000,       // Flight duration across the screen (ms)
+  baseArch: 180,         // Gentle upward lifting arc (px)
+  waveAmp: 25,          // Wavy ripple amplitude (px, higher = more undulating)
+  waveFreq: 2.0,        // Number of wave cycles across flight
+  riseDrift: 80,        // Subtle upward drift as letters exit (px)
+  fontSize: 0,          // Font size in px (0 = automatically match figure's body font)
+};
+
 export interface WalkingFigureHandle {
   destroy: () => void;
   sendNote: () => void;
@@ -237,20 +259,20 @@ export function initWalkingFigure(
     const r = containerEl.getBoundingClientRect();
     const p = clamp(1 - r.top / window.innerHeight);
 
-    // Active walking phase: from p = 0.0 to p = 0.85
-    // Starts 50% closer to the form module (-85px to -110px),
-    // and actively walks covering that distance to arrive centered (0px) in her column at p = 0.85!
+    // Calibration: Complete entire arrival timeline by halfway scroll of section (0.8)
+    // instead of waiting until the section is scrolled past the viewport (p = 1.0)
+    const animProgress = clamp(p / 0.8);
     const travelDistance = Math.min(Math.max(window.innerWidth * 0.08, 75), 110);
-    const walkProgress = clamp(p / 0.85);
+    const walkProgress = clamp(animProgress / 0.85);
     const walkX = (walkProgress - 1) * travelDistance;
     cv.style.setProperty('--walk', `${walkX.toFixed(1)}px`);
 
     // Advance walk cycle in direct sync with horizontal motion so feet keep stepping
     targetWalkPhase = walkProgress * Math.PI * 10;
 
-    // Only once arrived at center (p >= 0.85) does the figure stop and progressively raise the phone!
-    if (p >= 0.85) {
-      targetPhoneAmt = clamp((p - 0.85) / 0.15); // Smooth 0 to 1 over final arrival
+    // Only once arrived at center (animProgress >= 0.85) does the figure stop and progressively raise the phone!
+    if (animProgress >= 0.85) {
+      targetPhoneAmt = clamp((animProgress - 0.85) / 0.15); // Smooth 0 to 1 over final arrival
     } else {
       targetPhoneAmt = 0;
     }
@@ -288,29 +310,36 @@ export function initWalkingFigure(
     stage.style.zIndex = '9999';
     stage.style.overflow = 'hidden';
 
-    // Typographic stream requested: "your message is being delivered • note sent"
-    const STREAM = 'your message is being delivered • note sent';
+    // Typographic stream: emit in reverse so that leading letters travel furthest right,
+    // forming the readable sentence "your message has been delivered" left-to-right on screen!
+    const MESSAGE = 'your message is been delivered';
+    const STREAM = Array.from(MESSAGE).reverse().join('');
+    const effectiveFontSize = TRAIL_CONFIG.fontSize > 0 ? TRAIL_CONFIG.fontSize : fs;
     const items: { el: HTMLElement; delay: number; duration: number }[] = [];
+    let currentDelay = 0;
 
-    Array.from(STREAM).forEach((ch, idx) => {
+    Array.from(STREAM).forEach((ch) => {
       const span = document.createElement('span');
       span.textContent = ch === ' ' ? '\u00A0' : ch;
       span.style.position = 'absolute';
       span.style.left = '0';
       span.style.top = '0';
-      span.style.fontFamily = '"EB Garamond", Georgia, serif';
+      span.style.fontFamily = '"EB Garamond", "Iowan Old Style", "Palatino Linotype", "Palatino", Georgia, serif';
       span.style.fontStyle = 'italic';
-      span.style.fontSize = '15px';
+      span.style.fontSize = `${effectiveFontSize}px`;
       span.style.fontWeight = '400';
-      span.style.color = '#141312';
+      span.style.color = color;
       span.style.opacity = '0';
       span.style.willChange = 'transform, opacity';
       stage.appendChild(span);
 
+      const delay = currentDelay;
+      currentDelay += ch === ' ' ? TRAIL_CONFIG.wordDelay : TRAIL_CONFIG.letterDelay;
+
       items.push({
         el: span,
-        delay: idx * 42, // Fluid stream spacing
-        duration: 2200   // 2.2s gentle flight time across screen
+        delay,
+        duration: TRAIL_CONFIG.duration
       });
     });
 
@@ -320,28 +349,33 @@ export function initWalkingFigure(
       items.forEach((item, i) => {
         setTimeout(() => {
           item.el.style.transition = 'transform 1.1s ease-out, opacity 1.1s ease-out';
-          item.el.style.transform = `translate3d(${startX + i * 8}px, ${startY - 40}px, 0)`;
+          item.el.style.transform = `translate3d(${startX + (items.length - 1 - i) * 8}px, ${startY - 40}px, 0)`;
           item.el.style.opacity = '0.7';
           requestAnimationFrame(() => {
-            item.el.style.transform = `translate3d(${startX + i * 12}px, ${startY - 90}px, 0)`;
+            item.el.style.transform = `translate3d(${startX + (items.length - 1 - i) * 12}px, ${startY - 90}px, 0)`;
             item.el.style.opacity = '0';
           });
         }, item.delay);
       });
       setTimeout(() => {
         if (stage.parentNode) stage.parentNode.removeChild(stage);
-      }, 2500);
+      }, currentDelay + 1400);
       return;
     }
 
-    // Natural undulating breeze curve — ZERO scale distortion, ZERO rotation wobble
+    // Natural undulating breeze curve — wavy crests & troughs with buoyant lift
     const startTime = performance.now();
     const targetX = window.innerWidth + 90;
-    const totalTime = (STREAM.length * 42) + 2200;
+    const totalTime = currentDelay + TRAIL_CONFIG.duration;
 
     function frame(now: number) {
       const elapsed = now - startTime;
       let activeCount = 0;
+
+      // Keep origin dynamically locked to the smartphone in case of scrolling or viewport changes
+      const cvR = cv.getBoundingClientRect();
+      const currentStartX = cvR.left + currentOx + 72 * currentScale;
+      const currentStartY = cvR.top + currentOy + 38 * currentScale;
 
       items.forEach((item) => {
         const itemElapsed = elapsed - item.delay;
@@ -358,10 +392,13 @@ export function initWalkingFigure(
 
         // Horizontal flight: smooth acceleration toward right screen edge
         const px = Math.pow(p, 1.15);
-        const posX = startX + (targetX - startX) * px;
+        const posX = currentStartX + (targetX - currentStartX) * px;
 
-        // Vertical path: graceful buoyant rise with a soft undulating curve
-        const posY = startY - 110 * Math.sin(p * Math.PI * 0.85) - 25 * p;
+        // Vertical path: multi-wave buoyant undulation (crest, dip, crest, exit)
+        const arch = -TRAIL_CONFIG.baseArch * Math.sin(p * Math.PI * 0.95);
+        const wave = -TRAIL_CONFIG.waveAmp * Math.sin(p * Math.PI * TRAIL_CONFIG.waveFreq);
+        const drift = -TRAIL_CONFIG.riseDrift * p;
+        const posY = currentStartY + arch + wave + drift;
 
         // PURE translation — NO scale distortion, NO rotation wobble!
         item.el.style.transform = `translate3d(${posX.toFixed(1)}px, ${posY.toFixed(1)}px, 0)`;
@@ -388,12 +425,21 @@ export function initWalkingFigure(
     requestAnimationFrame(frame);
   }
 
+  // Expose interactive live parameters and preview helper for design experimentation
+  if (typeof window !== 'undefined') {
+    (window as unknown as { __WALKER_TRAIL_CONFIG__?: TrailConfig; __WALKER_TEST_SEND__?: () => void }).__WALKER_TRAIL_CONFIG__ = TRAIL_CONFIG;
+    (window as unknown as { __WALKER_TRAIL_CONFIG__?: TrailConfig; __WALKER_TEST_SEND__?: () => void }).__WALKER_TEST_SEND__ = () => {
+      triggerLetterTrailFromPhone();
+    };
+  }
+
   cv.addEventListener('pointermove', onPointerMove);
   cv.addEventListener('pointerleave', onPointerLeave);
   window.addEventListener('scroll', onScroll, { passive: true });
   window.addEventListener('resize', setup);
 
   setup();
+  onScroll();
 
   return {
     destroy: () => {
@@ -401,6 +447,9 @@ export function initWalkingFigure(
       cv.removeEventListener('pointerleave', onPointerLeave);
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', setup);
+      if (typeof window !== 'undefined') {
+        delete (window as unknown as { __WALKER_TEST_SEND__?: () => void }).__WALKER_TEST_SEND__;
+      }
     },
     sendNote: triggerLetterTrailFromPhone
   };

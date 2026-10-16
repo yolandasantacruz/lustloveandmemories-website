@@ -40,7 +40,7 @@ import {
             Lust, Love,<br />and Memories
           </h1>
           <p class="hero-sub text-serif-italic">
-            Poetry on desire, connection, and the aftermath of relationships.
+            Poetry exploring intimacy and relationships.
           </p>
         </div>
       </div>
@@ -191,8 +191,7 @@ import {
           </h2>
           <div class="author-statement">
             <p class="author-summary">
-              Rooted in personal experience, my poetry explores moments where writing became my preferred way to process feelings and thoughts.
-            </p>
+              My poetry encapsulates moments where writing became a way to process and distill life.            </p>
             <p class="author-details">
               Awarded first place at the University of Talarrubias poetry contest, merit honors at the XVII Castello di Duino International Competition, and published in literary reviews including <em>Revista Literaria Visor</em> and <em>Carpa de Sueños</em>.
             </p>
@@ -214,6 +213,7 @@ import {
       <div class="container wr-grid">
         <div class="sheet-holder">
           <form
+            #sheetForm
             class="sheet"
             [class.fold]="isFolded()"
             (submit)="onSendLetter($event)"
@@ -221,7 +221,7 @@ import {
           >
             @if (!isSent()) {
               <label class="sheet-label">
-                <span class="field-title">Your message</span>
+                <span class="field-title">Message</span>
                 <textarea
                   name="message"
                   #letterMsg
@@ -232,7 +232,7 @@ import {
               </label>
 
               <label class="sheet-label">
-                <span class="field-title">Your email</span>
+                <span class="field-title">Email</span>
                 <input #letterEmail type="email" autocomplete="email" class="sheet-input" placeholder="email@address.com" />
               </label>
 
@@ -490,7 +490,7 @@ import {
       font-size: 0.95rem;
       line-height: 1.7;
       color: var(--ink-2);
-      margin: 0 0 1.5rem;
+      margin: 0;
     }
 
     .author-meta {
@@ -748,7 +748,7 @@ import {
       border-radius: 8px;
       box-shadow: 0 20px 50px -20px rgba(28, 22, 16, 0.10);
       position: relative;
-      min-height: 440px;
+      min-height: 520px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -830,7 +830,20 @@ import {
       flex-direction: column;
       justify-content: center;
       flex: 1;
+      min-height: 100%;
       padding: 1.5rem 0;
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .thanks-title {
@@ -856,7 +869,7 @@ import {
       justify-content: center;
       align-items: flex-end;
       padding-bottom: 0;
-      min-height: 440px;
+      min-height: 520px;
       position: relative;
       background: radial-gradient(
         ellipse 80% 75% at 50% 60%,
@@ -897,6 +910,14 @@ import {
       .wr-grid {
         grid-template-columns: 1fr;
         gap: 3rem;
+      }
+
+      .author-photo-wrap {
+        order: 2;
+      }
+
+      .author-text {
+        order: 1;
       }
 
       .book-feature,
@@ -945,6 +966,7 @@ export default class HomeComponent {
 
   letterMsg = viewChild<ElementRef<HTMLTextAreaElement>>('letterMsg');
   letterEmail = viewChild<ElementRef<HTMLInputElement>>('letterEmail');
+  sheetForm = viewChild<ElementRef<HTMLFormElement>>('sheetForm');
 
   isFolded = signal(false);
   isSent = signal(false);
@@ -1021,18 +1043,18 @@ export default class HomeComponent {
     this.formError.set('');
     this.isFolded.set(true);
 
+    // Pin height to avoid any layout jump during transition to the thank-you state
+    const formEl = this.sheetForm()?.nativeElement;
+    if (formEl) {
+      const currentH = formEl.getBoundingClientRect().height;
+      formEl.style.minHeight = `${Math.max(currentH, 520)}px`;
+    }
+
     // Easter egg: Woosh of poetic letters bursting from the smartphone and soaring offscreen right!
     this.walkerHandle?.sendNote();
 
-    const subject = encodeURIComponent('Note from Reader');
-    const body = encodeURIComponent(`${msg}\n\n— ${email ? 'Reader (' + email + ')' : 'A reader'}`);
-    const mailtoUrl = `mailto:lustloveandmemories@gmail.com?subject=${subject}&body=${body}`;
-
     setTimeout(() => {
       this.isSent.set(true);
-      if (isPlatformBrowser(this.platformId) && this.document.defaultView) {
-        this.document.defaultView.location.href = mailtoUrl;
-      }
     }, 1200);
   }
 
@@ -1040,5 +1062,9 @@ export default class HomeComponent {
     this.isSent.set(false);
     this.isFolded.set(false);
     this.formError.set('');
+    const formEl = this.sheetForm()?.nativeElement;
+    if (formEl) {
+      formEl.style.minHeight = '';
+    }
   }
 }

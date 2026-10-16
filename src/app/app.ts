@@ -7,7 +7,12 @@ import { RouterLink, RouterOutlet, Router } from '@angular/router';
   imports: [RouterLink, RouterOutlet],
   template: `
     <!-- ─── Navigation ──────────────────────────────── -->
-    <header class="site-header" [class.scrolled]="scrolled()" [class.nav--hidden]="navHidden() && !menuOpen()">
+    <header
+      class="site-header"
+      [class.scrolled]="scrolled()"
+      [class.nav--hidden]="navHidden() && !menuOpen()"
+      [class.menu-open]="menuOpen()"
+    >
       <div class="nav-inner">
         <a routerLink="/" class="brand" aria-label="Home" (click)="scrollTo('top', $event)">
           <span class="brand__title">Yolanda Santa Cruz</span>
@@ -179,6 +184,7 @@ import { RouterLink, RouterOutlet, Router } from '@angular/router';
       line-height: 1.1;
       gap: 2px;
       flex-shrink: 0;
+      transition: opacity var(--dur-med) var(--ease-out);
     }
 
     .brand__title {
@@ -425,6 +431,19 @@ import { RouterLink, RouterOutlet, Router } from '@angular/router';
       .nav-toggle { display: flex; }
       .nav-sep    { display: none; }
       .site-nav--desktop { display: none; }
+
+      /* Smoothly fade out the top navigation bar when mobile menu is open */
+      .site-header.menu-open {
+        background: transparent !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        box-shadow: none !important;
+      }
+
+      .site-header.menu-open .brand {
+        opacity: 0;
+        pointer-events: none;
+      }
 
       .mobile-backdrop {
         display: block;
