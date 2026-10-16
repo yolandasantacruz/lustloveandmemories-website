@@ -7,8 +7,8 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
   imports: [RouterLink, RouterLinkActive, RouterOutlet],
   template: `
     <!-- ─── Navigation ──────────────────────────────── -->
-    <header class="site-header" [class.scrolled]="scrolled()">
-      <div class="nav-inner container">
+    <header class="site-header" [class.scrolled]="scrolled()" [class.nav--hidden]="navHidden()">
+      <div class="nav-inner">
         <a routerLink="/" class="brand" aria-label="Home">
           <span class="brand__title">Yolanda Santa Cruz</span>
         </a>
@@ -19,13 +19,6 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
           <a routerLink="/books" routerLinkActive="active" (click)="closeMenu()">Books</a>
           <span class="nav-sep" aria-hidden="true">·</span>
           <a routerLink="/about" routerLinkActive="active" (click)="closeMenu()">About</a>
-          <a href="https://www.instagram.com/lustloveandmemories" target="_blank" rel="noopener" class="nav-ig" aria-label="Instagram">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
-              <circle cx="12" cy="12" r="4"/>
-              <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor"/>
-            </svg>
-          </a>
         </nav>
 
         <button class="nav-toggle" (click)="toggleMenu()" [attr.aria-expanded]="menuOpen()" aria-label="Toggle menu">
@@ -48,8 +41,29 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
     <!-- ─── Footer ───────────────────────────────────── -->
     <footer class="site-footer">
       <div class="container footer-inner">
-        <div class="footer-copy">
-          <p>© {{ year }} Yolanda Santa Cruz</p>
+        <div class="footer-grid">
+          <div class="footer-col footer-col--brand">
+            <span class="footer-brand">Yolanda Santa Cruz</span>
+            <p class="footer-tagline text-serif-italic">
+              Poet and artist. Exploring love, heartbreak, and quiet healing through intimate verse and typographic art.
+            </p>
+          </div>
+
+          <div class="footer-col footer-col--inquiry">
+            <div class="footer-inquiry-main">
+              <p class="footer-text">For readings, collaborations, and press:</p>
+              <a
+                href="https://www.instagram.com/lustloveandmemories"
+                target="_blank"
+                rel="noopener"
+                class="footer-link"
+              >
+                &#64;lustloveandmemories
+              </a>
+            </div>
+
+            <p class="footer-copy">&copy; {{ year }} &middot; All rights reserved</p>
+          </div>
         </div>
       </div>
     </footer>
@@ -69,32 +83,46 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
       right: 0;
       z-index: 200;
       padding: 0;
-      transition: background var(--dur-med) var(--ease-out),
+      transform: translateY(0);
+      transition: transform 0.36s cubic-bezier(0.16, 1, 0.3, 1),
+                  background var(--dur-med) var(--ease-out),
                   backdrop-filter var(--dur-med) var(--ease-out),
                   box-shadow var(--dur-med) var(--ease-out);
+      will-change: transform;
+    }
+
+    .site-header.nav--hidden {
+      transform: translateY(-100%);
     }
 
     /* Transparent on top of hero */
     .site-header:not(.scrolled) {
       background: transparent;
       backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      border-bottom: none;
+      box-shadow: none;
     }
 
-    /* Glassmorphism when scrolled */
+    /* Glassmorphism when scrolled — evident transparency and blur, no dividing line */
     .site-header.scrolled {
-      background: rgba(14, 12, 10, 0.72);
-      backdrop-filter: blur(20px) saturate(180%);
-      -webkit-backdrop-filter: blur(20px) saturate(180%);
-      border-bottom: 1px solid rgba(201, 169, 110, 0.12);
-      box-shadow: 0 4px 32px rgba(0,0,0,0.4);
+      background: rgba(248, 247, 243, 0.70);
+      backdrop-filter: blur(16px) saturate(160%);
+      -webkit-backdrop-filter: blur(16px) saturate(160%);
+      border-bottom: none;
+      box-shadow: 0 4px 20px rgba(20, 19, 18, 0.03);
     }
 
     .nav-inner {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      height: 72px;
-      gap: 2rem;
+      height: 58px;
+      gap: 1.5rem;
+      width: 100%;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 clamp(1.5rem, 3.5vw, 2.75rem);
     }
 
     /* ─── Brand ─────────────────────────────────────── */
@@ -108,20 +136,20 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
     .brand__title {
       font-family: var(--font-display);
-      font-size: 1.15rem;
-      font-weight: 400;
-      font-style: italic;
-      color: var(--parchment);
-      letter-spacing: 0.01em;
+      font-size: 0.92rem;
+      font-weight: 500;
+      font-style: normal;
+      color: var(--ink);
+      letter-spacing: 0.04em;
     }
 
     .brand__sub {
       font-family: var(--font-body);
       font-size: 0.6rem;
       font-weight: 400;
-      letter-spacing: 0.2em;
+      letter-spacing: 0.16em;
       text-transform: uppercase;
-      color: var(--gold);
+      color: var(--ink-muted);
       opacity: 0.8;
     }
 
@@ -129,49 +157,50 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
     .site-nav {
       display: flex;
       align-items: center;
-      gap: 0.4rem;
+      gap: 0.45rem;
     }
 
     .nav-sep {
-      color: rgba(201,169,110,0.3);
-      font-size: 0.8rem;
+      color: var(--rule);
+      font-size: 0.7rem;
       pointer-events: none;
       user-select: none;
+      opacity: 0.6;
     }
 
-    .site-nav a:not(.nav-ig) {
+    .site-nav a {
       font-family: var(--font-body);
-      font-size: 0.72rem;
-      font-weight: 400;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--text-secondary);
-      padding: 0.35em 0.7em;
+      font-size: 0.86rem;
+      font-weight: 450;
+      letter-spacing: 0.02em;
+      text-transform: none;
+      color: var(--ink-2);
+      padding: 0.25em 0.55em;
       border-radius: 2px;
       transition: color var(--dur-fast) ease;
       position: relative;
     }
 
-    .site-nav a:not(.nav-ig)::after {
+    .site-nav a::after {
       content: '';
       position: absolute;
       bottom: 0;
-      left: 0.7em;
-      right: 0.7em;
+      left: 0.55em;
+      right: 0.55em;
       height: 1px;
-      background: var(--gold);
+      background: var(--ink);
       transform: scaleX(0);
       transform-origin: left;
       transition: transform var(--dur-med) var(--ease-out);
     }
 
-    .site-nav a:not(.nav-ig):hover,
-    .site-nav a:not(.nav-ig).active {
-      color: var(--parchment);
+    .site-nav a:hover,
+    .site-nav a.active {
+      color: var(--ink);
     }
 
-    .site-nav a:not(.nav-ig):hover::after,
-    .site-nav a:not(.nav-ig).active::after {
+    .site-nav a:hover::after,
+    .site-nav a.active::after {
       transform: scaleX(1);
     }
 
@@ -182,16 +211,16 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
       width: 34px;
       height: 34px;
       border-radius: 50%;
-      border: 1px solid var(--border);
-      color: var(--text-secondary);
+      border: 1px solid var(--rule);
+      color: var(--ink-soft);
       margin-left: 0.6rem;
       transition: all var(--dur-med) var(--ease-out);
     }
 
     .nav-ig:hover {
-      color: var(--gold);
-      border-color: var(--gold);
-      background: var(--gold-dim);
+      color: var(--ink);
+      border-color: var(--ink);
+      background: var(--paper-2);
     }
 
     /* ─── Hamburger ──────────────────────────────────── */
@@ -200,7 +229,7 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
       background: none;
       border: none;
       cursor: pointer;
-      color: var(--parchment);
+      color: var(--ink);
       padding: 0.5rem;
       line-height: 0;
     }
@@ -212,26 +241,101 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
     /* ─── Footer ─────────────────────────────────────── */
     .site-footer {
-      background: var(--ink-soft);
-      border-top: 1px solid var(--border);
-      padding: 2rem 0;
+      background: var(--paper-2);
+      border-top: none;
+      padding: clamp(4rem, 7vh, 6rem) 0 clamp(3.5rem, 6vh, 5rem);
+      margin-top: auto;
     }
 
     .footer-inner {
       display: flex;
-      justify-content: center;
-      align-items: center;
+      flex-direction: column;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+      gap: clamp(2.5rem, 6vw, 6rem);
+      align-items: stretch;
+    }
+
+    .footer-col {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .footer-col--brand {
+      gap: 0.75rem;
+    }
+
+    .footer-brand {
+      font-family: var(--font-display);
+      font-size: 1.45rem;
+      font-weight: 400;
+      color: var(--ink);
+      line-height: 1.15;
+      letter-spacing: -0.01em;
+    }
+
+    .footer-tagline {
+      font-size: 0.92rem;
+      color: var(--ink-soft);
+      line-height: 1.6;
+      margin: 0;
+      max-width: 360px;
+    }
+
+    .footer-col--inquiry {
+      justify-content: space-between;
+      gap: 2.25rem;
+    }
+
+    .footer-inquiry-main {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .footer-text {
+      font-family: var(--font-body);
+      font-size: 0.88rem;
+      color: var(--ink-soft);
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    .footer-link {
+      font-family: var(--font-body);
+      font-size: 0.92rem;
+      color: var(--ink);
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      padding-bottom: 2px;
+      width: fit-content;
+      transition: border-color var(--dur-fast) ease;
+    }
+    .footer-link:hover {
+      color: var(--ink);
+      border-bottom-color: var(--ink);
     }
 
     .footer-copy {
-      text-align: center;
+      font-family: var(--font-body);
+      font-size: 0.78rem;
+      color: var(--ink-muted);
+      margin: 0;
+      letter-spacing: 0.04em;
     }
 
-    .footer-copy p {
-      font-family: var(--font-body);
-      font-size: 0.7rem;
-      color: var(--text-secondary);
-      line-height: 1.6;
+    @media (max-width: 700px) {
+      .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+      }
+      .footer-col--inquiry {
+        justify-content: flex-start;
+        gap: 2rem;
+      }
     }
 
     /* ─── Mobile ─────────────────────────────────────── */
@@ -270,9 +374,11 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 export class App {
   readonly year = new Date().getFullYear();
   readonly scrolled = signal(false);
+  readonly navHidden = signal(false);
   readonly menuOpen = signal(false);
   private platformId = inject(PLATFORM_ID);
   private document = inject(DOCUMENT);
+  private lastScrollY = 0;
 
   constructor() {
     afterNextRender(() => {
@@ -304,7 +410,28 @@ export class App {
   onScroll() {
     if (isPlatformBrowser(this.platformId)) {
       const windowRef = this.document.defaultView;
-      this.scrolled.set(windowRef ? windowRef.scrollY > 60 : false);
+      if (!windowRef) return;
+      const currentY = windowRef.scrollY;
+      const delta = currentY - this.lastScrollY;
+
+      // Evident glassmorphism blur triggers past top area
+      this.scrolled.set(currentY > 20);
+
+      // Do not hide when mobile navigation menu is open
+      if (this.menuOpen()) {
+        this.navHidden.set(false);
+      } else if (currentY <= 60) {
+        // At the top of the page, always keep the navbar visible
+        this.navHidden.set(false);
+      } else if (delta > 6) {
+        // Scrolling down -> hide navbar
+        this.navHidden.set(true);
+      } else if (delta < -6) {
+        // Scrolling up -> reveal navbar
+        this.navHidden.set(false);
+      }
+
+      this.lastScrollY = Math.max(0, currentY);
     }
   }
 

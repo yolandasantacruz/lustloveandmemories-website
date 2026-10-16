@@ -1,678 +1,983 @@
-import { Component, AfterViewInit, PLATFORM_ID, inject } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  viewChild,
+  signal,
+  inject,
+  PLATFORM_ID,
+  afterNextRender,
+  ChangeDetectionStrategy
+} from '@angular/core';
 import { isPlatformBrowser, DOCUMENT, NgOptimizedImage } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import {
+  initLetterSea,
+  initHeroFigure,
+  initRevealingPoem,
+  CURATED_POEMS,
+  initWalkingFigure,
+  setupLiveLetters
+} from './literary-art';
 
 @Component({
   selector: 'app-home',
   imports: [RouterLink, NgOptimizedImage],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <!-- ═══ HERO ═══════════════════════════════════════════════════ -->
-    <section class="hero">
-      <!-- Atmospheric background layers -->
-      <div class="hero-bg" aria-hidden="true">
-        <div class="hero-bg__image">
-          <img src="/images/travel.webp" alt="" aria-hidden="true" fetchpriority="high" decoding="sync" />
-        </div>
-        <div class="hero-bg__gradient"></div>
-        <div class="hero-bg__vignette"></div>
-        <div class="hero-bg__grain"></div>
-      </div>
+    <!-- ═══ AMBIENT OCEAN OF LETTERS (GLOBAL BACKGROUND) ════════════════ -->
+    <canvas #seaCanvas class="global-sea-canvas" aria-hidden="true"></canvas>
 
-      <div class="hero-content container">
-        <div class="hero-text">
-          <p class="text-label hero-eyebrow reveal">confessional poet · artist</p>
-          <h1 class="hero-headline reveal reveal-delay-1">
-            <em>Hey there,</em>
-            <span class="hero-headline__line2">I'm Yolanda.</span>
+    <!-- ═══ 1. HERO — POETIC LEAD ═══════════════════════════════════════ -->
+    <section class="hero" #heroSection aria-labelledby="heroTitle">
+      <div class="hero-spotlight" aria-hidden="true"></div>
+
+      <div class="container hero-container">
+        <div class="hero-lead">
+          <span class="kicker text-sc">Two Poetry Collections</span>
+          <h1 id="heroTitle" class="hero-headline live">
+            &ldquo;Whenever I want to write you, I write me.&rdquo;
           </h1>
-          <p class="hero-body reveal reveal-delay-2">
-            I believe in the therapeutic power of art.
-            Through my words, I have documented the experiences
-            I have had along the way.
+          <p class="hero-sub text-serif-italic">
+            Poetry on desire, grief, and surviving the quiet hours.
           </p>
-          <div class="hero-actions reveal reveal-delay-3">
-            <a routerLink="/books" class="btn btn--primary">Explore my books</a>
-            <a routerLink="/about" class="btn btn--ghost">About me</a>
-          </div>
-        </div>
-
-        <!-- Author portrait -->
-        <div class="hero-portrait reveal reveal-delay-2">
-          <div class="hero-portrait__frame">
-            <img
-              src="/images/author-800w.webp"
-              srcset="/images/author-400w.webp 400w, /images/author-800w.webp 800w"
-              sizes="(max-width: 768px) 100vw, 400px"
-              width="800"
-              height="796"
-              alt="Yolanda Santa Cruz"
-              fetchpriority="high"
-              decoding="sync"
-            />
-          </div>
-          <div class="hero-portrait__glow" aria-hidden="true"></div>
-        </div>
-      </div>
-
-      <!-- Scroll indicator -->
-      <div class="scroll-hint reveal reveal-delay-4" aria-hidden="true">
-        <span class="scroll-hint__line"></span>
-        <span class="scroll-hint__label">scroll</span>
-      </div>
-    </section>
-
-    <!-- ═══ QUOTE INTERLUDE ═════════════════════════════════════════ -->
-    <!-- <section class="quote-section">
-      <div class="container">
-        <div class="quote-wrap reveal">
-          <div class="ornament">✦</div>
-          <blockquote class="quote-text">
-            "Happy moments don't want to come out.
-            We don't want them to.
-            We want to keep them contained within us
-            for as long as possible.
-            That is why it is so hard to write about them."
-          </blockquote>
-          <cite class="quote-attr">— Yolanda Santa Cruz, <em>Lust, Love, and Memories</em></cite>
-        </div>
-      </div>
-    </section> -->
-
-    <!-- ═══ BOOKS ════════════════════════════════════════════════════ -->
-    <section class="books-section">
-      <div class="container">
-        <header class="section-header reveal">
-          <p class="text-label">Written Works</p>
-          <h2 class="section-title">
-            <a routerLink="/books">Books</a>
-          </h2>
-        </header>
-
-        <div class="books-grid">
-          <!-- Book 1 -->
-          <article class="book-card reveal reveal-delay-1">
-            <div class="book-card__cover-wrap">
-              <a routerLink="/books/lust-love-and-memories" class="book-card__cover-link" aria-label="Order Lust, Love, and Memories">
-                <img ngSrc="images/book-lust-love-memories.webp" width="1280" height="1478" alt="Lust, Love, and Memories" class="book-card__cover" ngSrcset="400w, 800w, 1200w" sizes="(max-width: 768px) 100vw, 400px" />
-                <div class="book-card__cover-glow"></div>
-              </a>
-            </div>
-            <div class="book-card__body">
-              <p class="book-card__num text-label">Vol. I</p>
-              <h3 class="book-card__title">Lust, Love,<br/>and Memories</h3>
-              <div class="divider"></div>
-              <p class="book-card__desc">
-                A compilation of poems that focuses on all stages of romantic relationships — from the desire
-                and excitement felt at the very beginning, to the aftermath of them.
-              </p>
-              <a routerLink="/books/lust-love-and-memories" class="btn">
-                Read more <span class="sr-only">about Lust, Love, and Memories</span>
-              </a>
-            </div>
-          </article>
-
-          <!-- Book 2 -->
-          <article class="book-card book-card--dark reveal reveal-delay-2">
-            <div class="book-card__cover-wrap">
-              <a routerLink="/books/the-longest-nights" class="book-card__cover-link" aria-label="Order The Longest Nights">
-                <img ngSrc="images/book-longest-nights.webp" width="1280" height="1460" alt="The Longest Nights" class="book-card__cover" ngSrcset="400w, 800w, 1200w" sizes="(max-width: 768px) 100vw, 400px" />
-                <div class="book-card__cover-glow book-card__cover-glow--blue"></div>
-              </a>
-            </div>
-            <div class="book-card__body">
-              <p class="book-card__num text-label">Vol. II</p>
-              <h3 class="book-card__title">The Longest<br/>Nights</h3>
-              <div class="divider"></div>
-              <p class="book-card__desc">
-                A deep dive into the healing journey after experiencing a romantic loss.
-                With each chapter dedicated to the five stages of grief, from denial to acceptance.
-              </p>
-              <a routerLink="/books/the-longest-nights" class="btn">
-                Read more <span class="sr-only">about The Longest Nights</span>
-              </a>
-            </div>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <!-- ═══ POEM IMAGE FEATURE ═══════════════════════════════════════ -->
-    <section class="feature-section">
-      <div class="feature-grid">
-        <div class="feature-image reveal">
-          <img ngSrc="images/poem-flower.webp" width="1130" height="1155" alt="poem art" ngSrcset="400w, 800w, 1200w" sizes="(max-width: 768px) 100vw, 50vw" />
-          <div class="feature-image__overlay"></div>
-        </div>
-
-        <div class="feature-text-wrap">
-          <div class="feature-text reveal reveal-delay-1">
-            <p class="text-label">From the pages</p>
-            <blockquote class="feature-quote">
-              "some flowers get killed<br/>
-              before they get<br/>
-              their chance to flourish."
-            </blockquote>
-            <a routerLink="/books" class="btn" style="margin-top:2rem">Read the books</a>
+          <div class="hero-actions">
+            <a href="#works" class="btn">Explore Collections</a>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ═══ CONTACT ═══════════════════════════════════════════════════ -->
-    <section class="contact-section">
-      <div class="container contact-inner">
-        <div class="ornament reveal">✦</div>
-        <h2 class="contact-title text-display reveal reveal-delay-1">Get in touch</h2>
-        <p class="contact-body reveal reveal-delay-2">
-          Instagram is the best place to reach me. Send me a message and I'll get back to you as soon as I can :D
+    <!-- ═══ 2. PUBLISHED COLLECTIONS (SEQUENTIAL EDITORIAL SHOWCASE) ══ -->
+    <section class="sec works-section" id="works" aria-labelledby="worksH">
+      <div class="container center-head">
+        <span class="kicker text-sc">Published Collections</span>
+        <h2 id="worksH" class="sec-title live">The Books</h2>
+        <p class="sec-desc text-serif-italic">
+          Two companion volumes exploring romantic desire, loss, and survival.
         </p>
-        <a href="https://www.instagram.com/lustloveandmemories" target="_blank" rel="noopener"
-           class="btn reveal reveal-delay-3">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <rect x="2" y="2" width="20" height="20" rx="5"/>
-            <circle cx="12" cy="12" r="4"/>
-            <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor"/>
-          </svg>
-          Let's talk!
-        </a>
+      </div>
+
+      <div class="container books-sequential">
+        <!-- Book 1: Lust, Love, and Memories -->
+        <article class="book-feature">
+          <div class="book-feature__cover">
+            <a href="https://www.amazon.com/dp/1736494805" target="_blank" rel="noopener" class="book-cover-anchor">
+              <img
+                ngSrc="images/book-lust-love-memories.webp"
+                ngSrcset="400w, 800w, 1200w"
+                sizes="(max-width: 768px) 100vw, 380px"
+                width="1200"
+                height="1386"
+                alt="Lust, Love, and Memories book cover"
+                class="book-img"
+                loading="lazy"
+              />
+            </a>
+          </div>
+          <div class="book-feature__content">
+            <span class="book-vol-tag text-sc">Volume I</span>
+            <h3 class="book-title live">
+              Lust, Love, and Memories
+            </h3>
+            <p class="book-desc">
+              A compilation of poems focusing on all stages of romantic relationships, from the desire and excitement felt at the very beginning to the quiet aftermath that follows. Each piece captures an emotional landscape of longing, connection, and honest survival.
+            </p>
+            <div class="book-links">
+              <a href="https://www.amazon.com/dp/1736494805" target="_blank" rel="noopener" class="btn">Order Book</a>
+            </div>
+          </div>
+        </article>
+
+        <!-- Book 2: The Longest Nights -->
+        <article class="book-feature book-feature--alt">
+          <div class="book-feature__cover">
+            <a href="https://www.amazon.com/dp/1736494821" target="_blank" rel="noopener" class="book-cover-anchor">
+              <img
+                ngSrc="images/book-longest-nights.webp"
+                ngSrcset="400w, 800w, 1200w"
+                sizes="(max-width: 768px) 100vw, 380px"
+                width="1200"
+                height="1369"
+                alt="The Longest Nights book cover"
+                class="book-img"
+                loading="lazy"
+              />
+            </a>
+          </div>
+          <div class="book-feature__content">
+            <span class="book-vol-tag text-sc">Volume II</span>
+            <h3 class="book-title live">
+              The Longest Nights
+            </h3>
+            <p class="book-desc">
+              Dissects the grieving we go through after romantic loss, with each chapter dedicated to the five stages of grief. Encounter poems that move from denial of the present to the acceptance that comes only after making peace with the past.
+            </p>
+            <div class="book-links">
+              <a href="https://www.amazon.com/dp/1736494821" target="_blank" rel="noopener" class="btn">Order Book</a>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ═══ 4. THE AUTHOR (MINIMALIST LITERARY STATEMENT) ═══════════════ -->
+    <section class="sec author-section" id="author" aria-labelledby="authorH">
+      <div class="container author-grid">
+        <div class="author-photo-wrap">
+          <img
+            ngSrc="images/yolanda-portrait.webp"
+            ngSrcset="400w, 800w, 1200w"
+            sizes="(max-width: 768px) 100vw, 400px"
+            width="768"
+            height="1024"
+            alt="Portrait of Yolanda Santa Cruz"
+            class="author-photo"
+            loading="lazy"
+          />
+        </div>
+
+        <div class="author-text">
+          <span class="kicker text-sc">The Author</span>
+          <h2 id="authorH" class="sec-title live">
+            Behind the Verse
+          </h2>
+          <div class="author-statement">
+            <p class="author-summary">
+              Art is approached as a catalyst that heals and uplifts both creator and reader. Rooted in personal memory, the poetry explores moments where emotion demanded quiet honesty—balancing raw confessional intimacy with the visual architecture of words on paper.
+            </p>
+            <p class="author-details">
+              Awarded first place at the University of Talarrubias poetry contest, merit honors at the XVII Castello di Duino International Competition, and published in literary reviews including <em>Revista Literaria Visor</em> and <em>Carpa de Sueños</em>.
+            </p>
+            <div class="author-meta">
+              <a routerLink="/about" class="text-link">Biography &amp; Publications</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ 5. SHAPES IN TEXT (TRANSPARENT TYPOGRAPHIC SILHOUETTES) ═════ -->
+    <section class="sec shapes-section" id="shapes" aria-labelledby="shapesH" #shapesSection>
+      <div class="container shapes-grid">
+        <div class="shapes-copy">
+          <span class="kicker text-sc">Metamorphosis</span>
+          <h2 id="shapesH" class="sec-title live">Shapes in text</h2>
+          <p class="shapes-main">
+            Letters gathering into silhouettes shaped by memory.
+          </p>
+          <p class="shapes-sub text-serif-italic" #figCaption aria-live="polite">
+            Tap the figure to rearrange its verses.
+          </p>
+        </div>
+
+        <div class="shapes-canvas-col">
+          <div class="shapes-frame">
+            <canvas #figCanvas class="fig-canvas" aria-hidden="true"></canvas>
+            <button #figBtn type="button" class="fig-btn" aria-label="Rearrange letters into a new figure"></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ 6. UNCOVER THE POEM (ATMOSPHERIC REVEALING POETRY CANVAS) ══ -->
+    <section class="sec reveal-section" id="poetry" aria-labelledby="revealH">
+      <div class="container center-head">
+        <span class="kicker text-sc">Poetry</span>
+        <h2 id="revealH" class="sec-title live">Uncover the Poem</h2>
+        <p class="sec-desc text-serif-italic">
+          Move your mouse over to uncover the letters.
+        </p>
+      </div>
+
+      <div class="container">
+        <div class="reveal-wrap">
+          <canvas #revealCanvas class="reveal-canvas" aria-hidden="true"></canvas>
+          <p class="sr-only">
+            Whenever I want to write you, I write me. — How My Poems Are Created · Lust, Love, and Memories.
+            Some flowers get killed before they get their chance to flourish. — Unflourished · The Longest Nights.
+            Enter, come in, you are welcomed. I want to break free, the only way of doing so is opening the door. — Entry as Exit · The Longest Nights.
+            Some memories stay with you like shattered glass, making you bleed every time you stumble upon them. — Shattered Glass · The Longest Nights.
+            I wear a sleep mask to bed. Every time I lift it up, I pray that it is already morning. — The Longest Nights · The Longest Nights.
+            We already lost each other many weeks ago. I am getting back my peace. — Peace · The Longest Nights.
+            I will always make time for emotions, and that’s how this book came to be. — For Emotions · Lust, Love, and Memories.
+            Softness is my soft spot. We were creating art. — Soft Spot · Lust, Love, and Memories.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ 7. WRITE A NOTE + WALKING FIGURE (CORRESPONDENCE) ═══════════ -->
+    <section class="sec write-section" id="write" aria-labelledby="wrH">
+      <div class="container center-head">
+        <span class="kicker text-sc">Correspondence</span>
+        <h2 id="wrH" class="sec-title live">Write a note</h2>
+        <p class="sec-desc text-serif-italic">
+          Direct inquiries, reader reflections, and correspondence.
+        </p>
+      </div>
+
+      <div class="container wr-grid">
+        <div class="sheet-holder">
+          <form
+            class="sheet"
+            [class.fold]="isFolded()"
+            (submit)="onSendLetter($event)"
+            novalidate
+          >
+            <label class="sheet-label">
+              <span class="field-title">Your message</span>
+              <textarea
+                name="message"
+                #letterMsg
+                class="letter-textarea"
+                placeholder="Write your note or reflection here..."
+                rows="6"
+              ></textarea>
+            </label>
+
+            <div class="fields">
+              <label class="sheet-label">
+                <span class="field-title">Your name</span>
+                <input #letterName type="text" autocomplete="name" class="sheet-input" placeholder="Name" />
+              </label>
+              <label class="sheet-label">
+                <span class="field-title">Your email</span>
+                <input #letterEmail type="email" autocomplete="email" class="sheet-input" placeholder="email@address.com" />
+              </label>
+            </div>
+
+            <div class="send-row">
+              <p class="form-error" role="alert">{{ formError() }}</p>
+              <button type="submit" class="btn">Send Note</button>
+            </div>
+          </form>
+
+          @if (isSent()) {
+            <div class="thanks-msg reveal">
+              <p class="text-serif-italic">Note prepared.</p>
+              <small class="text-body">
+                Your email client is opening with your message. You can also connect directly on Instagram at
+                <a href="https://www.instagram.com/lustloveandmemories" target="_blank" rel="noopener" class="underline-link">&#64;lustloveandmemories</a>.
+              </small>
+            </div>
+          }
+        </div>
+
+        <!-- Walking Text Figure alongside note (plain, unencapsulated) -->
+        <div class="wr-figure-wrap" #walkSection>
+          <canvas #walkCanvas class="walk-canvas" aria-hidden="true"></canvas>
+        </div>
       </div>
     </section>
   `,
   styles: `
-    /* ═══ HERO ══════════════════════════════════════════════ */
+    :host {
+      display: block;
+      color: var(--ink);
+      background: var(--paper);
+    }
+
+    .container {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 0 clamp(1.5rem, 4vw, 3rem);
+    }
+
+    .center-head {
+      text-align: center;
+      max-width: 680px;
+      margin: 0 auto clamp(2.5rem, 5vw, 4rem);
+    }
+
+    .kicker {
+      display: block;
+      font-family: var(--font-sc);
+      font-size: 0.82rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.85rem;
+    }
+
+    .sec-title {
+      font-family: var(--font-display);
+      font-weight: 400;
+      font-size: clamp(2.2rem, 1.8rem + 1.8vw, 3.4rem);
+      line-height: 1.1;
+      letter-spacing: -0.015em;
+      color: var(--ink);
+      margin: 0 0 0.85rem;
+    }
+
+    .sec-desc {
+      font-size: clamp(1rem, 0.95rem + 0.25vw, 1.18rem);
+      color: var(--ink-muted);
+      line-height: 1.55;
+      margin: 0;
+    }
+
+    .sec {
+      padding: clamp(5rem, 10vh, 8.5rem) 0;
+      position: relative;
+    }
+
+    /* ─── 1. HERO ─────────────────────────────────────────────────── */
+    .global-sea-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 0;
+      display: block;
+    }
+
     .hero {
       position: relative;
-      min-height: 100svh;
+      min-height: 88vh;
       display: flex;
       align-items: center;
+      padding: clamp(7.5rem, 15vh, 11rem) 0 clamp(5rem, 9vh, 7rem);
       overflow: hidden;
-    }
-
-    /* Background layers */
-    .hero-bg {
-      position: absolute;
-      inset: 0;
-      z-index: 0;
-    }
-
-    .hero-bg__image {
-      position: absolute;
-      inset: 0;
-    }
-    .hero-bg__image img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: center 30%;
-      filter: saturate(0.6);
-      transform: scale(1.04);
-      animation: slowKen 20s ease-in-out infinite alternate;
-    }
-    @keyframes slowKen {
-      from { transform: scale(1.04) translate(0, 0); }
-      to   { transform: scale(1.08) translate(-1%, -1%); }
-    }
-
-    .hero-bg__gradient {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(
-        135deg,
-        rgba(14,12,10,0.92) 0%,
-        rgba(14,12,10,0.7) 50%,
-        rgba(14,12,10,0.55) 100%
-      );
-    }
-
-    .hero-bg__vignette {
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(ellipse at center, transparent 30%, rgba(14,12,10,0.6) 100%);
-    }
-
-    .hero-bg__grain {
-      position: absolute;
-      inset: 0;
-      opacity: 0.035;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-      background-size: 200px 200px;
-    }
-
-    /* Content */
-    .hero-content {
-      position: relative;
+      background: transparent;
       z-index: 1;
-      display: grid;
-      grid-template-columns: 1fr auto;
-      align-items: center;
-      gap: clamp(3rem, 6vw, 6rem);
-      padding-top: 90px;
-      padding-bottom: 6rem;
     }
 
-    .hero-eyebrow {
-      margin-bottom: 1.2rem;
+    .hero-spotlight {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(
+        ellipse 75% 65% at 30% 50%,
+        rgba(248, 247, 243, 0.88) 0%,
+        rgba(248, 247, 243, 0.45) 50%,
+        rgba(248, 247, 243, 0) 100%
+      );
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .hero-container {
+      position: relative;
+      z-index: 3;
+      width: 100%;
+      pointer-events: none;
+    }
+
+    .hero-lead {
+      max-width: 740px;
+      pointer-events: auto;
     }
 
     .hero-headline {
       font-family: var(--font-display);
-      font-weight: 300;
-      font-style: normal;
-      line-height: 0.95;
-      color: var(--parchment);
-      margin-bottom: 1.75rem;
-    }
-
-    .hero-headline em {
-      display: block;
+      font-size: clamp(2.8rem, 1.8rem + 3.8vw, 5rem);
+      font-weight: 400;
       font-style: italic;
-      font-size: clamp(3.8rem, 8vw, 6.5rem);
-      color: var(--gold-light);
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      margin: 0 0 1.3rem;
     }
 
-    .hero-headline__line2 {
-      display: block;
-      font-size: clamp(2.8rem, 6vw, 4.8rem);
-      font-style: normal;
-      font-weight: 300;
-      letter-spacing: -0.01em;
-      color: var(--parchment);
-      margin-top: 0.1em;
-    }
-
-    .hero-body {
-      font-family: var(--font-body);
-      font-size: clamp(0.95rem, 1.5vw, 1.08rem);
-      font-weight: 300;
-      line-height: 1.8;
-      color: var(--text-secondary);
-      max-width: 44ch;
-      margin-bottom: 2.5rem;
+    .hero-sub {
+      font-size: clamp(1.15rem, 1.05rem + 0.35vw, 1.4rem);
+      color: var(--ink-soft);
+      line-height: 1.5;
+      margin: 0 0 2.2rem;
     }
 
     .hero-actions {
       display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-
-    /* Portrait */
-    .hero-portrait {
-      position: relative;
-      flex-shrink: 0;
-    }
-
-    .hero-portrait__frame {
-      width: clamp(180px, 22vw, 300px);
-      aspect-ratio: 1;
-      border-radius: 50%;
-      overflow: hidden;
-      border: 1px solid rgba(201,169,110,0.25);
-      box-shadow: 0 0 0 8px rgba(201,169,110,0.06),
-                  0 32px 80px rgba(0,0,0,0.5);
-    }
-
-    .hero-portrait__frame img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      filter: saturate(0.85);
-    }
-
-    .hero-portrait__glow {
-      position: absolute;
-      inset: -20%;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(201,169,110,0.08) 0%, transparent 70%);
-      pointer-events: none;
-    }
-
-    /* Scroll hint */
-    .scroll-hint {
-      position: absolute;
-      bottom: 2.5rem;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      flex-direction: column;
+      gap: 1.25rem;
       align-items: center;
-      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      color: var(--ink);
+      border: 1px solid var(--ink);
+      padding: 0.55rem 1.45rem;
+      font-family: var(--font-body);
+      font-size: 0.88rem;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      text-transform: none;
+      text-decoration: none;
+      border-radius: 0;
+      cursor: pointer;
+      box-shadow: none;
+      transition: background var(--dur-fast), color var(--dur-fast), border-color var(--dur-fast);
+    }
+    .btn:hover {
+      background: var(--ink);
+      color: var(--paper);
+      transform: none;
+      box-shadow: none;
+    }
+
+    .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      color: var(--ink);
+      border: 1px solid var(--rule);
+      padding: 0.55rem 1.45rem;
+      font-family: var(--font-body);
+      font-size: 0.88rem;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      text-transform: none;
+      text-decoration: none;
+      border-radius: 0;
+      transition: border-color var(--dur-fast), background var(--dur-fast);
+    }
+    .btn-ghost:hover {
+      border-color: var(--ink);
+      background: rgba(20, 19, 18, 0.04);
+    }
+
+    /* ─── 4. THE AUTHOR ───────────────────────────────────────────── */
+    .author-section {
+      background: transparent;
+      position: relative;
       z-index: 1;
     }
 
-    .scroll-hint__line {
-      display: block;
-      width: 1px;
-      height: 48px;
-      background: linear-gradient(to bottom, var(--gold), transparent);
-      opacity: 0.5;
-      animation: scrollPulse 2.2s ease-in-out infinite;
-    }
-    @keyframes scrollPulse {
-      0%, 100% { opacity: 0.2; transform: scaleY(0.7); transform-origin: top; }
-      50%       { opacity: 0.6; transform: scaleY(1); }
-    }
-
-    .scroll-hint__label {
-      font-family: var(--font-body);
-      font-size: 0.6rem;
-      letter-spacing: 0.22em;
-      text-transform: uppercase;
-      color: var(--gold);
-      opacity: 0.5;
-    }
-
-    /* ═══ QUOTE ══════════════════════════════════════════════ */
-    .quote-section {
-      background: var(--ink-soft);
-      padding: clamp(4rem, 8vw, 7rem) 0;
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-    }
-
-    .quote-wrap {
-      max-width: 700px;
-      margin: 0 auto;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
+    .author-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+      gap: clamp(3rem, 6vw, 6.5rem);
       align-items: center;
-      gap: 1.5rem;
     }
 
-    .quote-text {
+    .author-photo-wrap {
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    .author-photo {
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 20px 48px -16px rgba(20, 19, 18, 0.20), 0 4px 12px rgba(20, 19, 18, 0.06);
+      display: block;
+    }
+
+    .author-statement {
+      margin: 1.8rem 0 0;
+    }
+
+    .statement-lead {
       font-family: var(--font-display);
-      font-style: italic;
-      font-weight: 300;
-      font-size: clamp(1.4rem, 3vw, 2rem);
-      line-height: 1.5;
-      color: var(--parchment);
-      letter-spacing: -0.01em;
+      font-size: clamp(1.25rem, 1.15rem + 0.4vw, 1.6rem);
+      line-height: 1.45;
+      color: var(--ink);
+      border-left: 2px solid var(--gold);
+      padding-left: 1.25rem;
+      margin: 0 0 1.25rem !important;
     }
 
-    .quote-attr {
-      font-family: var(--font-body);
-      font-size: 0.78rem;
-      font-weight: 400;
-      letter-spacing: 0.08em;
-      color: var(--gold);
-      opacity: 0.7;
+    .author-summary {
+      font-size: 1.05rem;
+      line-height: 1.75;
+      color: var(--ink);
+      margin: 0 0 1.25rem;
     }
 
-    .quote-attr em { font-style: italic; font-family: var(--font-display); }
-
-    /* ═══ BOOKS ══════════════════════════════════════════════ */
-    .books-section {
-      background: var(--surface);
-      padding: var(--section-v) 0;
+    .author-details {
+      font-size: 0.95rem;
+      line-height: 1.7;
+      color: var(--ink-2);
+      margin: 0 0 1.5rem;
     }
 
-    .section-header {
-      margin-bottom: clamp(3rem, 6vw, 5rem);
+    .author-meta {
+      margin-top: 1.4rem;
     }
 
-    .section-header .text-label { margin-bottom: 0.75rem; }
-
-    .section-title {
-      font-family: var(--font-display);
-      font-style: italic;
-      font-weight: 300;
-      font-size: clamp(2.5rem, 5vw, 3.8rem);
-      color: var(--parchment);
-      line-height: 1;
-      margin-bottom: 0.75rem;
-    }
-
-    .section-title a {
-      color: inherit;
-      text-decoration: none;
-      transition: color var(--dur-fast) var(--ease-out);
-    }
-
-    .section-title a:hover {
-      color: var(--gold);
-    }
-
-    .section-sub {
-      font-family: var(--font-body);
-      font-size: 0.88rem;
-      font-weight: 300;
-      color: var(--text-secondary);
-      letter-spacing: 0.04em;
-    }
-
-    .books-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.5px;
-      border: 1px solid var(--border);
-    }
-
-    .book-card {
-      display: grid;
-      grid-template-columns: 1fr;
-      align-items: start;
-      background: var(--surface-2);
-      padding: clamp(2rem, 4vw, 3.5rem);
+    /* ─── 3. SHAPES IN TEXT (TRANSPARENT SILHOUETTES) ─────────────── */
+    .shapes-section {
+      background: transparent;
       position: relative;
-      overflow: hidden;
-      transition: background var(--dur-med) ease;
+      z-index: 1;
     }
 
-    .book-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--gold), transparent);
-      opacity: 0;
-      transition: opacity var(--dur-med) ease;
+    .shapes-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+      gap: clamp(2.5rem, 6vw, 6rem);
+      align-items: center;
     }
 
-    .book-card:hover::before { opacity: 1; }
-    .book-card:hover { background: rgba(30,26,22,0.95); }
+    .shapes-main {
+      font-size: clamp(1.2rem, 1.1rem + 0.4vw, 1.55rem);
+      line-height: 1.45;
+      color: var(--ink);
+      margin: 1.5rem 0 1rem;
+    }
 
-    .book-card__cover-wrap {
-      position: relative;
-      margin-bottom: 2rem;
+    .shapes-sub {
+      font-size: 1.05rem;
+      line-height: 1.65;
+      color: var(--gold);
+      margin: 0;
+      min-height: 2.8em;
+    }
+
+    .shapes-canvas-col {
       display: flex;
       justify-content: center;
     }
 
-    .book-card__cover-link { position: relative; display: block; }
+    .shapes-frame {
+      position: relative;
+      width: min(480px, 88vw);
+      aspect-ratio: 100 / 110;
+      background: transparent;
+      box-shadow: none;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
-    .book-card__cover {
-      width: clamp(140px, 22vw, 220px);
-      height: auto;
+    .fig-canvas {
+      width: 100%;
+      height: 100%;
       display: block;
-      border-radius: 2px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 4px 20px rgba(0,0,0,0.3);
-      transition: transform var(--dur-slow) var(--ease-out),
-                  box-shadow var(--dur-slow) var(--ease-out);
     }
 
-    .book-card__cover-link:hover .book-card__cover {
-      transform: translateY(-8px) rotate(-1deg);
-      box-shadow: 0 32px 80px rgba(0,0,0,0.6), 0 8px 32px rgba(0,0,0,0.4);
-    }
-
-    .book-card__cover-glow {
+    .fig-btn {
       position: absolute;
-      inset: 20%;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(140,58,58,0.3) 0%, transparent 70%);
-      filter: blur(20px);
-      pointer-events: none;
-      z-index: -1;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      border-radius: 8px;
+    }
+    .fig-btn:focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 4px;
     }
 
-    .book-card__cover-glow--blue {
-      background: radial-gradient(circle, rgba(60,80,160,0.3) 0%, transparent 70%);
+    /* ─── 4. BOOKS SHOWCASE (OPEN, FLUID EDITORIAL PRESENTATION) ───── */
+    .works-section {
+      background: transparent;
+      position: relative;
+      z-index: 1;
     }
 
-    .book-card__body {
+    .books-sequential {
       display: flex;
       flex-direction: column;
-      gap: 1rem;
-      align-items: flex-start;
+      gap: clamp(7.5rem, 16vh, 12rem);
     }
 
-    .book-card__num { margin-bottom: 0.25rem; }
+    .book-feature {
+      display: grid;
+      grid-template-columns: minmax(0, 380px) minmax(0, 1fr);
+      gap: clamp(2.5rem, 6vw, 5.5rem);
+      align-items: center;
+    }
 
-    .book-card__title {
+    .book-feature--alt {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 380px);
+    }
+
+    .book-feature--alt .book-feature__cover {
+      order: 2;
+    }
+
+    .book-feature--alt .book-feature__content {
+      order: 1;
+    }
+
+    .book-feature__cover {
+      width: 100%;
+      max-width: 380px;
+      margin: 0 auto;
+    }
+
+    .book-cover-anchor {
+      display: block;
+      width: 100%;
+    }
+
+    .book-img {
+      width: 100%;
+      height: auto;
+      border-radius: 6px;
+      box-shadow: 0 18px 42px -12px rgba(20, 19, 18, 0.20), 0 4px 12px rgba(20, 19, 18, 0.06);
+      transition: transform var(--dur-med) var(--ease-out), box-shadow var(--dur-med) var(--ease-out);
+      display: block;
+    }
+    .book-img:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 24px 50px -12px rgba(20, 19, 18, 0.26);
+    }
+
+    .book-feature__content {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .book-vol-tag {
+      font-size: 0.8rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.6rem;
+    }
+
+    .book-title {
       font-family: var(--font-display);
-      font-style: italic;
-      font-weight: 300;
-      font-size: clamp(1.7rem, 2.8vw, 2.3rem);
-      line-height: 1.1;
-      color: var(--parchment);
+      font-size: clamp(2rem, 1.6rem + 1.2vw, 2.7rem);
+      font-weight: 400;
+      color: var(--ink);
+      line-height: 1.15;
+      margin: 0 0 1rem;
+    }
+
+    .book-desc {
+      font-size: 1.1rem;
+      color: var(--ink-2);
+      line-height: 1.75;
+      margin: 0 0 1.8rem;
+      max-width: 52ch;
+    }
+
+    .book-links {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+      margin-top: 1.4rem;
+      flex-wrap: wrap;
+    }
+
+    .text-link {
+      font-size: 0.92rem;
+      font-weight: 500;
+      color: var(--ink);
+      text-decoration: none;
+      border-bottom: 1px solid var(--ink);
+      padding-bottom: 2px;
+      transition: color var(--dur-fast), border-color var(--dur-fast);
+    }
+    .text-link:hover {
+      color: var(--gold);
+      border-color: var(--gold);
+    }
+
+    /* ─── 5. REVEALING WORDS SECTION ──────────────────────────────── */
+    .reveal-section {
+      background: transparent;
+      position: relative;
+      z-index: 1;
+    }
+
+    .reveal-section .kicker {
+      margin-bottom: 0.5rem;
+    }
+
+    .reveal-section .sec-title {
+      margin-bottom: 0.5rem;
+    }
+
+    .reveal-section .center-head {
+      margin-bottom: clamp(1.3rem, 2.6vw, 2rem);
+    }
+
+    .reveal-wrap {
+      position: relative;
+      width: 100%;
+      max-width: 880px;
+      min-height: 330px;
+      margin: 0 auto;
+      padding: 0.5rem 1rem 1.35rem;
+      background: radial-gradient(
+        ellipse 65% 55% at 50% 50%,
+        rgba(243, 240, 233, 0.85) 0%,
+        rgba(248, 247, 243, 0) 100%
+      );
+      border-radius: 12px;
+    }
+
+    .reveal-canvas {
+      width: 100%;
+      height: clamp(300px, 36vw, 370px);
+      cursor: url('/images/quill-cursor.png') 0 37, crosshair;
+      cursor: -webkit-image-set(url('/images/quill-cursor.png') 1x, url('/images/quill-cursor@2x.png') 2x) 0 37, url('/images/quill-cursor.png') 0 37, crosshair;
+      display: block;
+    }
+
+    /* ─── 6. WRITE A NOTE ─────────────────────────────────────────── */
+    .write-section {
+      background: transparent;
+      position: relative;
+      z-index: 1;
+    }
+
+    .write-section .kicker {
+      color: var(--ink-3);
+    }
+
+    .write-section .sec-desc {
+      color: var(--ink-3);
+    }
+
+    .wr-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+      gap: clamp(2.5rem, 6vw, 6rem);
+      align-items: center;
+    }
+
+    .sheet-holder {
+      position: relative;
+    }
+
+    .sheet {
+      background: var(--paper-sheet);
+      padding: clamp(2rem, 4vw, 3rem);
+      border-radius: 8px;
+      box-shadow: 0 20px 50px -20px rgba(28, 22, 16, 0.10);
+      position: relative;
+    }
+
+    .sheet-label {
+      display: block;
+      margin-bottom: 1.5rem;
+    }
+
+    .field-title {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-3);
+      margin-bottom: 0.5rem;
+    }
+
+    .letter-textarea {
+      width: 100%;
+      border: 1px solid var(--rule-soft);
+      background: var(--paper);
+      padding: 1rem 1.1rem;
+      font-family: var(--font-body);
+      font-size: 1rem;
+      line-height: 1.6;
+      color: var(--ink);
+      border-radius: 4px;
+      resize: vertical;
+      box-sizing: border-box;
+      transition: border-color var(--dur-fast);
+    }
+    .letter-textarea:focus {
+      outline: none;
+      border-color: var(--gold);
+    }
+
+    .fields {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.25rem;
+    }
+
+    .sheet-input {
+      width: 100%;
+      border: 1px solid var(--rule-soft);
+      background: var(--paper);
+      padding: 0.75rem 1rem;
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      color: var(--ink);
+      border-radius: 4px;
+      box-sizing: border-box;
+      transition: border-color var(--dur-fast);
+    }
+    .sheet-input:focus {
+      outline: none;
+      border-color: var(--gold);
+    }
+
+    .send-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 1.5rem;
+    }
+
+    .form-error {
+      color: var(--rose);
+      font-size: 0.88rem;
       margin: 0;
     }
 
-    .book-card__desc {
-      font-family: var(--font-body);
-      font-size: 0.88rem;
-      font-weight: 300;
-      line-height: 1.75;
-      color: var(--text-secondary);
-      margin: 0.5rem 0;
+    .thanks-msg {
+      margin-top: 1.5rem;
+      padding: 1.25rem;
+      background: var(--paper);
+      border-radius: 4px;
+    }
+    .thanks-msg p {
+      font-size: 1.15rem;
+      color: var(--ink);
+      margin: 0 0 0.5rem;
     }
 
-    /* ═══ FEATURE ════════════════════════════════════════════ */
-    .feature-section {
-      background: var(--ink);
-    }
-
-    .feature-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      min-height: 520px;
-    }
-
-    .feature-image {
-      position: relative;
-      overflow: hidden;
-    }
-
-    .feature-image img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform var(--dur-slow) var(--ease-out);
-    }
-
-    .feature-image:hover img { transform: scale(1.04); }
-
-    .feature-image__overlay {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(to right, transparent 50%, var(--ink) 100%);
-    }
-
-    .feature-text-wrap {
+    .wr-figure-wrap {
       display: flex;
+      justify-content: center;
       align-items: center;
-      padding: clamp(2.5rem, 5vw, 5rem);
-      background: var(--ink);
+      min-height: 380px;
+      background: transparent;
     }
 
-    .feature-text {
-      max-width: 400px;
+    .walk-canvas {
+      width: clamp(200px, 22vw, 300px);
+      height: auto;
+      aspect-ratio: 100 / 160;
+      display: block;
+      margin: 0 auto;
+      cursor: crosshair;
+      background: transparent;
     }
 
-    .feature-text .text-label { margin-bottom: 1.5rem; }
-
-    .feature-quote {
-      font-family: var(--font-display);
-      font-style: italic;
-      font-weight: 300;
-      font-size: clamp(1.5rem, 2.5vw, 2.1rem);
-      line-height: 1.45;
-      color: var(--parchment);
-      letter-spacing: -0.01em;
-      border-left: 1px solid var(--gold);
-      padding-left: 1.5rem;
-      opacity: 0.9;
-    }
-
-    /* ═══ CONTACT ════════════════════════════════════════════ */
-    .contact-section {
-      background: var(--ink-soft);
-      border-top: 1px solid var(--border);
-      padding: var(--section-v) 0;
-    }
-
-    .contact-inner {
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1.5rem;
-    }
-
-    .contact-title {
-      font-size: clamp(2.5rem, 5vw, 4rem);
-      color: var(--parchment);
-      font-weight: 300;
-    }
-
-    .contact-body {
-      font-family: var(--font-body);
-      font-size: 1rem;
-      font-weight: 300;
-      color: var(--text-secondary);
-      max-width: 46ch;
-      line-height: 1.75;
-    }
-
-    /* ═══ RESPONSIVE ════════════════════════════════════════ */
-    @media (max-width: 768px) {
-      .hero-content {
+    /* ─── RESPONSIVE BREAKPOINTS ──────────────────────────────────── */
+    @media (max-width: 900px) {
+      .author-grid,
+      .shapes-grid,
+      .wr-grid {
         grid-template-columns: 1fr;
-        text-align: center;
-        padding-top: 120px;
+        gap: 3rem;
       }
 
-      .hero-portrait { display: flex; justify-content: center; order: -1; }
+      .book-feature,
+      .book-feature--alt {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+      }
 
-      .hero-body { max-width: 100%; margin-inline: auto; }
+      .book-feature--alt .book-feature__cover {
+        order: 0;
+      }
 
-      .hero-actions { justify-content: center; }
+      .book-feature--alt .book-feature__content {
+        order: 1;
+      }
 
-      .books-grid { grid-template-columns: 1fr; gap: 1px; }
+      .shapes-canvas-col {
+        order: -1;
+      }
 
-      .feature-grid { grid-template-columns: 1fr; }
-      .feature-image { height: 320px; }
-      .feature-image__overlay {
-        background: linear-gradient(to bottom, transparent 50%, var(--ink) 100%);
+      .fields {
+        grid-template-columns: 1fr;
       }
     }
-  `,
+  `
 })
-export default class Home implements AfterViewInit {
+export default class HomeComponent {
   private platformId = inject(PLATFORM_ID);
   private document = inject(DOCUMENT);
 
-  ngAfterViewInit() {
-    if (!isPlatformBrowser(this.platformId)) return;
+  seaCanvas = viewChild<ElementRef<HTMLCanvasElement>>('seaCanvas');
+  shapesSection = viewChild<ElementRef<HTMLElement>>('shapesSection');
+  figCanvas = viewChild<ElementRef<HTMLCanvasElement>>('figCanvas');
+  figBtn = viewChild<ElementRef<HTMLElement>>('figBtn');
+  figCaption = viewChild<ElementRef<HTMLElement>>('figCaption');
 
-    const observer = new IntersectionObserver(
-      entries => entries.forEach(e => {
-        if (e.isIntersecting) {
-          e.target.classList.add('visible');
-          observer.unobserve(e.target);
-        }
-      }),
-      { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
-    );
+  revealCanvas = viewChild<ElementRef<HTMLCanvasElement>>('revealCanvas');
+  walkCanvas = viewChild<ElementRef<HTMLCanvasElement>>('walkCanvas');
+  walkSection = viewChild<ElementRef<HTMLElement>>('walkSection');
 
-    this.document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  letterMsg = viewChild<ElementRef<HTMLTextAreaElement>>('letterMsg');
+  letterName = viewChild<ElementRef<HTMLInputElement>>('letterName');
+  letterEmail = viewChild<ElementRef<HTMLInputElement>>('letterEmail');
 
-    // Trigger hero reveals immediately
-    this.document.querySelectorAll('.hero .reveal').forEach(el => {
-      el.classList.add('visible');
+  isFolded = signal(false);
+  isSent = signal(false);
+  formError = signal('');
+  currentYear = new Date().getFullYear();
+
+  constructor() {
+    afterNextRender(() => {
+      if (!isPlatformBrowser(this.platformId)) return;
+
+      const prefersRM =
+        this.document.defaultView?.matchMedia('(prefers-reduced-motion: reduce)').matches ?? false;
+
+      // 1. Initialize live letter tilt on all headings
+      setupLiveLetters(this.document.body, prefersRM);
+
+      // 2. Initialize Hero Ocean Wave of Letters
+      const cvSea = this.seaCanvas()?.nativeElement;
+      if (cvSea) {
+        initLetterSea(cvSea, prefersRM, '#5c564d');
+      }
+
+      // 3. Initialize Shapes in Text (Morphing Typographic Figures)
+      const cvFig = this.figCanvas()?.nativeElement;
+      const btnFig = this.figBtn()?.nativeElement;
+      const capFig = this.figCaption()?.nativeElement;
+      const secFig = this.shapesSection()?.nativeElement;
+      if (cvFig && btnFig && capFig && secFig) {
+        initHeroFigure(cvFig, btnFig, capFig, secFig, prefersRM, '#141312');
+      }
+
+      // 4. Initialize Revealing Poetry Canvas
+      const cvRev = this.revealCanvas()?.nativeElement;
+      if (cvRev) {
+        initRevealingPoem(cvRev, CURATED_POEMS, prefersRM, '#141312');
+      }
+
+      // 5. Initialize Walking Text Figure in Correspondence section
+      const cvWalk = this.walkCanvas()?.nativeElement;
+      const walkEl = this.walkSection()?.nativeElement;
+      if (cvWalk && walkEl) {
+        initWalkingFigure(cvWalk, walkEl, prefersRM, '#141312');
+      }
     });
+  }
+
+  onSendLetter(e: Event) {
+    e.preventDefault();
+    const msg = this.letterMsg()?.nativeElement.value.trim() ?? '';
+    const name = this.letterName()?.nativeElement.value.trim() ?? '';
+    const email = this.letterEmail()?.nativeElement.value.trim() ?? '';
+
+    if (!msg) {
+      this.formError.set('Please write your note before sending.');
+      this.letterMsg()?.nativeElement.focus();
+      return;
+    }
+
+    if (email && !/^\S+@\S+\.\S+$/.test(email)) {
+      this.formError.set('Please check your email address format.');
+      this.letterEmail()?.nativeElement.focus();
+      return;
+    }
+
+    this.formError.set('');
+    this.isFolded.set(true);
+
+    const subject = encodeURIComponent(`Note from ${name || 'Reader'}`);
+    const body = encodeURIComponent(`${msg}\n\n— ${name || 'A reader'}${email ? '\n' + email : ''}`);
+    const mailtoUrl = `mailto:lustloveandmemories@gmail.com?subject=${subject}&body=${body}`;
+
+    setTimeout(() => {
+      this.isSent.set(true);
+      if (isPlatformBrowser(this.platformId) && this.document.defaultView) {
+        this.document.defaultView.location.href = mailtoUrl;
+      }
+    }, 1200);
   }
 }

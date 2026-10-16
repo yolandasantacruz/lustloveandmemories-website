@@ -1,42 +1,52 @@
 
 /* ═══════════════════════════════════════════════════════════════
-   DESIGN TOKENS — Dark Romantic Literary
+   DESIGN TOKENS — Clean Editorial Literary (Light Mode)
 ═══════════════════════════════════════════════════════════════ */
 :root {
-  /* Palette */
-  --ink:         #0e0c0a;         /* near-black warm */
-  --ink-soft:    #1a1714;         /* nav/footer */
-  --parchment:   #f5f0e8;         /* warm off-white */
-  --parchment-2: #ede5d4;         /* slightly warmer */
-  --gold:        #c9a96e;         /* warm antique gold */
-  --gold-light:  #e8c98a;         /* highlight gold */
-  --gold-dim:    rgba(201,169,110,0.18);
-  --rose:        #8c3a3a;         /* deep rose/burgundy */
-  --mist:        rgba(245,240,232,0.07);
+  /* Palette — Archival Linen Paper & Deep Carbon Ink */
+  --paper:       #f8f7f3;         /* warm luxurious paper background */
+  --paper-2:     #f1eee8;         /* secondary subtle surface / cards */
+  --paper-sheet: #fcfbf8;         /* crisp letter sheet */
+  --sheet:       #f5ede0;         /* warm parchment paper strip */
+  --parchment:   #fcfbf8;         /* legacy parchment alias */
+  --ink:         #141312;         /* ink 1: primary archival dark ink */
+  --ink-2:       #57534c;         /* ink 2: soft secondary copy */
+  --ink-3:       #78716c;         /* ink 3: muted tertiary / correspondence / kickers */
+  --ink-soft:    var(--ink-2);    /* soft readable charcoal (#57534c) */
+  --ink-muted:   var(--ink-3);    /* secondary editorial meta (#78716c) */
+  --ink-faint:   #a8a29e;         /* subtle hints and footers */
+  --rule:        rgba(20, 19, 18, 0.12); /* crisp editorial divider */
+  --gold:        #78716c;         /* ink 3 stone tone replacing brownish color */
+  --gold-light:  #a8a29e;
+  --gold-dim:    rgba(120, 113, 108, 0.12);
+  --rose:        #8c3a3a;         /* subtle burgundy accent */
 
   /* Text */
-  --text-primary:   var(--parchment);
-  --text-secondary: rgba(245,240,232,0.62);
-  --text-tertiary:  rgba(245,240,232,0.35);
-  --text-dark:      var(--ink);
+  --text-primary:   var(--ink);
+  --text-secondary: var(--ink-2);
+  --text-tertiary:  var(--ink-3);
+  --text-faint:     var(--ink-faint);
 
   /* Surfaces */
-  --surface:       #161210;
-  --surface-2:     #1e1a16;
-  --surface-card:  rgba(30,26,22,0.75);
-  --surface-glass: rgba(14,12,10,0.55);
+  --surface:       var(--paper-2);
+  --surface-2:     #eae6df;
+  --surface-card:  var(--paper-sheet);
+  --surface-glass: rgba(248, 247, 243, 0.90);
 
   /* Borders */
-  --border:        rgba(201,169,110,0.18);
-  --border-soft:   rgba(245,240,232,0.08);
+  --border:        var(--rule);
+  --border-soft:   var(--rule-soft);
 
   /* Fonts */
-  --font-display: 'Cormorant Garamond', 'Georgia', serif;
-  --font-sc:      'Cormorant SC', 'Georgia', serif;
-  --font-body:    'DM Sans', system-ui, sans-serif;
+  --font-serif:   'EB Garamond', 'Iowan Old Style', 'Palatino Linotype', 'Palatino', Georgia, serif;
+  --font-display: 'EB Garamond', 'Iowan Old Style', 'Palatino Linotype', 'Palatino', Georgia, serif;
+  --font-sc:      'Cormorant SC', 'EB Garamond', 'Iowan Old Style', 'Palatino Linotype', 'Palatino', Georgia, serif;
+  --font-body:    'EB Garamond', 'Iowan Old Style', 'Palatino Linotype', 'Palatino', Georgia, serif;
+  --font-hand:    'Homemade Apple', 'Bradley Hand', cursive;
+  --font-type:    'Courier Prime', 'Courier New', monospace;
 
   /* Spacing */
-  --max-w:        1160px;
+  --max-w:        1120px;
   --section-v:    clamp(4.5rem, 10vw, 8rem);
 
   /* Transitions */
@@ -47,10 +57,10 @@
   --dur-slow:     0.7s;
 
   font-family: var(--font-body);
-  font-size: 16px;
-  line-height: 1.65;
+  font-size: 18px;
+  line-height: 1.7;
   color: var(--text-primary);
-  background: var(--ink);
+  background: var(--paper);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
@@ -59,18 +69,39 @@
 /* ─── Reset ────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; background: var(--paper); }
 
 body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: var(--ink);
+  background: var(--paper);
+  color: var(--ink);
   overflow-x: hidden;
 }
 
-img { display: block; max-width: 100%; }
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 80;
+  opacity: 0.22;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .1 0 0 0 0 .09 0 0 0 0 .07 0 0 0 .32 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+::selection {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+img { display: block; max-width: 100%; height: auto; }
 a   { color: inherit; text-decoration: none; }
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+}
 
 /* ─── Layout Utilities ──────────────────────────────────────────── */
 .container {
@@ -123,49 +154,52 @@ a   { color: inherit; text-decoration: none; }
 .btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5em;
   font-family: var(--font-body);
-  font-size: 0.72rem;
+  font-size: 0.88rem;
   font-weight: 500;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  text-transform: none;
   cursor: pointer;
-  padding: 0.8em 2em;
-  color: var(--gold);
+  padding: 0.55rem 1.45rem;
+  color: var(--ink);
   background: transparent;
-  border: 1px solid rgba(201,169,110,0.45);
-  transition: all var(--dur-med) var(--ease-out);
+  border: 1px solid var(--ink);
+  border-radius: 0;
+  transition: background var(--dur-fast), color var(--dur-fast), border-color var(--dur-fast);
   position: relative;
+  text-decoration: none;
+  box-shadow: none;
 }
 
 .btn:hover {
-  background: var(--gold-dim);
-  border-color: var(--gold);
-  box-shadow: 0 0 24px rgba(201,169,110,0.15);
-  transform: translateY(-2px);
+  background: var(--ink);
+  color: var(--paper);
+  transform: none;
+  box-shadow: none;
 }
 
 .btn.btn--primary {
   color: var(--ink);
-  background: var(--gold);
-  border-color: var(--gold);
+  background: transparent;
+  border: 1px solid var(--ink);
 }
 
 .btn.btn--primary:hover {
-  background: var(--gold-light);
-  border-color: var(--gold-light);
-  box-shadow: 0 0 28px rgba(201,169,110,0.4);
+  background: var(--ink);
+  color: var(--paper);
 }
 
 .btn.btn--ghost {
-  color: var(--parchment);
-  border-color: rgba(245,240,232,0.25);
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  background: transparent;
 }
 
 .btn.btn--ghost:hover {
-  background: rgba(245,240,232,0.08);
-  border-color: rgba(245,240,232,0.5);
-  box-shadow: none;
+  border-color: var(--ink);
+  background: rgba(20, 19, 18, 0.04);
 }
 
 /* ─── Scroll-reveal animation ───────────────────────────────────── */
@@ -224,7 +258,7 @@ a   { color: inherit; text-decoration: none; }
   font-family: var(--font-body);
   font-size: 1.05rem;
   line-height: 1.85;
-  color: rgba(245,240,232,0.78);
+  color: var(--text-secondary);
 }
 .analog-markdown p {
   text-align: left;
@@ -234,7 +268,7 @@ a   { color: inherit; text-decoration: none; }
   font-style: italic;
   font-family: var(--font-display);
   font-size: 1.15em;
-  color: var(--parchment);
+  color: var(--ink);
 }
 .analog-markdown h1,
 .analog-markdown h2,
@@ -242,7 +276,7 @@ a   { color: inherit; text-decoration: none; }
   font-family: var(--font-display);
   font-style: italic;
   font-weight: 400;
-  color: var(--parchment);
+  color: var(--ink);
   margin-bottom: 0.75em;
 }
 

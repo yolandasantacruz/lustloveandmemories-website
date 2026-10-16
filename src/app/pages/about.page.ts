@@ -125,7 +125,7 @@ import { isPlatformBrowser, DOCUMENT, NgOptimizedImage } from '@angular/common';
         </p>
         <a href="https://www.instagram.com/lustloveandmemories" target="_blank" rel="noopener"
            class="btn btn--primary reveal reveal-delay-3">
-          Get in touch!
+          Get in Touch
         </a>
       </div>
     </section>
@@ -158,9 +158,9 @@ import { isPlatformBrowser, DOCUMENT, NgOptimizedImage } from '@angular/common';
       inset: 0;
       background: linear-gradient(
         to top,
-        rgba(14,12,10,0.97) 0%,
-        rgba(14,12,10,0.5) 50%,
-        rgba(14,12,10,0.2) 100%
+        var(--paper) 0%,
+        rgba(248, 247, 243, 0.82) 45%,
+        rgba(248, 247, 243, 0.35) 100%
       );
     }
 
@@ -174,16 +174,16 @@ import { isPlatformBrowser, DOCUMENT, NgOptimizedImage } from '@angular/common';
 
     .about-headline {
       font-family: var(--font-display);
-      font-weight: 300;
-      line-height: 0.9;
-      color: var(--parchment);
+      font-weight: 400;
+      line-height: 0.95;
+      color: var(--ink);
     }
 
     .about-headline em {
       display: block;
       font-style: italic;
       font-size: clamp(3rem, 7vw, 6rem);
-      color: var(--gold-light);
+      color: var(--gold);
     }
 
     .about-headline span {
@@ -195,7 +195,7 @@ import { isPlatformBrowser, DOCUMENT, NgOptimizedImage } from '@angular/common';
 
     /* ═══ BIO ══════════════════════════════════════════════════ */
     .bio-section {
-      background: var(--surface);
+      background: var(--paper);
       padding: var(--section-v) 0;
       border-bottom: 1px solid var(--border);
     }
@@ -223,8 +223,8 @@ import { isPlatformBrowser, DOCUMENT, NgOptimizedImage } from '@angular/common';
       border-radius: 50%;
       overflow: hidden;
       border: 1px solid var(--border);
-      box-shadow: 0 0 0 6px rgba(201,169,110,0.05),
-                  0 24px 60px rgba(0,0,0,0.5);
+      box-shadow: 0 0 0 6px rgba(158,121,57,0.06),
+                  0 20px 48px rgba(20,19,18,0.12);
     }
 
     .bio-portrait__frame img {
@@ -257,9 +257,9 @@ import { isPlatformBrowser, DOCUMENT, NgOptimizedImage } from '@angular/common';
       font-family: var(--font-display);
       font-style: italic;
       font-size: clamp(1.3rem, 2.5vw, 1.7rem);
-      font-weight: 300;
+      font-weight: 400;
       line-height: 1.4;
-      color: var(--parchment);
+      color: var(--ink);
     }
 
     .bio-text p:not(.bio-intro) {
@@ -274,7 +274,7 @@ import { isPlatformBrowser, DOCUMENT, NgOptimizedImage } from '@angular/common';
       font-style: italic;
       font-family: var(--font-display);
       font-size: 1.1em;
-      color: var(--parchment);
+      color: var(--ink);
     }
 
     /* Achievements */
@@ -293,7 +293,7 @@ import { isPlatformBrowser, DOCUMENT, NgOptimizedImage } from '@angular/common';
       gap: 0.9rem;
       font-family: var(--font-body);
       font-size: 0.83rem;
-      font-weight: 300;
+      font-weight: 400;
       color: var(--text-secondary);
       line-height: 1.5;
     }
@@ -307,7 +307,7 @@ import { isPlatformBrowser, DOCUMENT, NgOptimizedImage } from '@angular/common';
 
     /* ═══ GALLERY ════════════════════════════════════════════ */
     .gallery-section {
-      background: var(--ink);
+      background: var(--surface);
       padding: var(--section-v) 0;
     }
 
@@ -320,9 +320,9 @@ import { isPlatformBrowser, DOCUMENT, NgOptimizedImage } from '@angular/common';
     .gallery-title {
       font-family: var(--font-display);
       font-style: italic;
-      font-weight: 300;
+      font-weight: 400;
       font-size: clamp(2.2rem, 4.5vw, 3.5rem);
-      color: var(--parchment);
+      color: var(--ink);
       line-height: 1;
     }
 
@@ -330,7 +330,7 @@ import { isPlatformBrowser, DOCUMENT, NgOptimizedImage } from '@angular/common';
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       grid-template-rows: auto auto;
-      gap: 2px;
+      gap: 12px;
     }
 
     .gallery-item--large {
@@ -342,7 +342,9 @@ import { isPlatformBrowser, DOCUMENT, NgOptimizedImage } from '@angular/common';
       overflow: hidden;
       position: relative;
       cursor: pointer;
-      background: var(--surface-2);
+      background: var(--paper-sheet);
+      border-radius: 4px;
+      border: 1px solid var(--border);
     }
 
     .gallery-item img {
@@ -350,7 +352,7 @@ import { isPlatformBrowser, DOCUMENT, NgOptimizedImage } from '@angular/common';
       height: 100%;
       min-height: 240px;
       object-fit: cover;
-      filter: saturate(0.75) brightness(0.9);
+      filter: saturate(0.85) brightness(0.95);
       transition: filter var(--dur-slow) var(--ease-out),
                   transform var(--dur-slow) var(--ease-out);
       display: block;
@@ -360,7 +362,7 @@ import { isPlatformBrowser, DOCUMENT, NgOptimizedImage } from '@angular/common';
 
     .gallery-item:hover img {
       filter: saturate(1) brightness(1);
-      transform: scale(1.04);
+      transform: scale(1.03);
     }
 
     .gallery-item figcaption {
@@ -369,11 +371,11 @@ import { isPlatformBrowser, DOCUMENT, NgOptimizedImage } from '@angular/common';
       left: 0;
       right: 0;
       padding: 2rem 1rem 1rem;
-      background: linear-gradient(transparent, rgba(14,12,10,0.85));
+      background: linear-gradient(transparent, rgba(20,19,18,0.85));
       font-family: var(--font-body);
-      font-size: 0.73rem;
+      font-size: 0.75rem;
       letter-spacing: 0.08em;
-      color: var(--parchment);
+      color: #f8f7f3;
       opacity: 0;
       transition: opacity var(--dur-med) ease;
     }
@@ -387,7 +389,7 @@ import { isPlatformBrowser, DOCUMENT, NgOptimizedImage } from '@angular/common';
 
     /* ═══ CONTACT ════════════════════════════════════════════ */
     .about-contact {
-      background: var(--ink-soft);
+      background: var(--paper-sheet);
       border-top: 1px solid var(--border);
       padding: var(--section-v) 0;
     }
@@ -403,16 +405,16 @@ import { isPlatformBrowser, DOCUMENT, NgOptimizedImage } from '@angular/common';
     .contact-title {
       font-family: var(--font-display);
       font-style: italic;
-      font-weight: 300;
+      font-weight: 400;
       font-size: clamp(2rem, 4.5vw, 3.5rem);
-      color: var(--parchment);
+      color: var(--ink);
       line-height: 1.1;
     }
 
     .contact-body {
       font-family: var(--font-body);
       font-size: 0.95rem;
-      font-weight: 300;
+      font-weight: 400;
       color: var(--text-secondary);
       max-width: 44ch;
       line-height: 1.75;

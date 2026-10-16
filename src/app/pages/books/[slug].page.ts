@@ -62,7 +62,7 @@ import BookAttributes from '../../book-attributes';
     }
   `,
   styles: `
-    .book-detail { background: var(--ink); }
+    .book-detail { background: var(--paper); min-height: 100vh; }
 
     /* ─── Back link ────────────────────────────────── */
     .back-link {
@@ -83,15 +83,16 @@ import BookAttributes from '../../book-attributes';
 
     /* ─── Hero ──────────────────────────────────────── */
     .book-hero {
-      background: var(--surface-2);
+      background: var(--surface);
       padding: clamp(2rem, 5vw, 4rem) 0 var(--section-v);
       border-bottom: 1px solid var(--border);
     }
 
     .book-hero-inner {
       display: grid;
-      grid-template-columns: 260px 1fr;
+      grid-template-columns: 280px 1fr;
       gap: clamp(2.5rem, 5vw, 5rem);
+      align-items: start;
     }
 
     .book-cover-wrap {
@@ -101,18 +102,19 @@ import BookAttributes from '../../book-attributes';
     .book-cover {
       width: 100%;
       height: auto;
-      border-radius: var(--radius-md);
-      box-shadow: 0 16px 56px rgba(28,28,28,0.25), 0 4px 16px rgba(28,28,28,0.12);
+      border-radius: 4px;
+      box-shadow: 0 16px 40px rgba(20, 19, 18, 0.14), 0 2px 8px rgba(20, 19, 18, 0.06);
       display: block;
+      border: 1px solid rgba(20, 19, 18, 0.08);
     }
 
-    .book-meta { display: flex; flex-direction: column; gap: 0.7rem; }
+    .book-meta { display: flex; flex-direction: column; gap: 0.85rem; }
 
     .book-meta__label {
       font-family: var(--font-body);
       font-size: 0.72rem;
-      font-weight: 500;
-      letter-spacing: 0.12em;
+      font-weight: 600;
+      letter-spacing: 0.16em;
       text-transform: uppercase;
       color: var(--gold);
       margin: 0;
@@ -121,10 +123,10 @@ import BookAttributes from '../../book-attributes';
     .book-meta__title {
       font-family: var(--font-display);
       font-style: italic;
-      font-weight: 300;
-      font-size: clamp(2rem, 4.5vw, 3.5rem);
+      font-weight: 400;
+      font-size: clamp(2.4rem, 5vw, 3.8rem);
       line-height: 1.05;
-      color: var(--parchment);
+      color: var(--ink);
       margin: 0;
     }
 

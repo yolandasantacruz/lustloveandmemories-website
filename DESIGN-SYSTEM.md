@@ -6,8 +6,8 @@
 
 ## 1. Typography
 The typographic scale emphasizes a "Dark Romantic Literary" feel. Do not redefine fonts in local CSS components.
-- **Display & Headings**: `Cormorant Garamond` (often italicized, `font-weight: 300` or `400`). Used for hero titles, quotes, and primary elegance.
-- **Structural Headings**: `Cormorant SC` (Small Caps, tracking expanded). Used for section titles and structured categorization.
+- **Display & Headings**: `EB Garamond` (preferred, often italicized, `font-weight: 400`). Fallback chain: `Iowan Old Style`, `Palatino Linotype`, `Palatino`, `Georgia`, `serif`. Used for hero titles, section titles, quotes, and primary elegance.
+- **Structural Headings**: `Cormorant SC` (Small Caps, tracking expanded). Fallback chain: `EB Garamond`, `Iowan Old Style`, `Palatino Linotype`, `Palatino`, `Georgia`, `serif`. Used for section titles and structured categorization.
 - **Body & UI**: `DM Sans` (`font-weight: 300` or `500`). Used for all readable body text, buttons, and small UI labels to maintain modern legibility against the ornate display fonts.
 
 ## 2. Colors
