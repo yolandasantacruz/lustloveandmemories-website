@@ -97,7 +97,13 @@ export const POEM_WATERMARK_CONFIG = {
   /**
    * Opacity of the watermark once the poem is fully uncovered (if dimOnReveal is true).
    */
-  revealedOpacity: 0.024
+  revealedOpacity: 0.024,
+
+  /**
+   * Optical vertical nudge in pixels (positive moves down, negative moves up).
+   * Default: 12px down to visually balance the ink splatter core across both poem and title.
+   */
+  offsetY: 12
 };
 
 function parseColorToRgb(colorStr: string): { r: number; g: number; b: number } {
@@ -453,11 +459,21 @@ export function initRevealingPoem(
     isFadingOut = false;
     hasStarted = false;
 
-    if (watermarkEl && verseBounds.maxX > verseBounds.minX) {
-      const centerX = (verseBounds.minX + verseBounds.maxX) / 2;
-      const centerY = (verseBounds.minY + verseBounds.maxY) / 2;
-      watermarkEl.style.left = `${centerX}px`;
-      watermarkEl.style.top = `${centerY}px`;
+    // Calculate total content bounds (verse + attribution line) so watermark centers across entirety of content
+    let cMinX = Infinity, cMaxX = -Infinity;
+    let cMinY = Infinity, cMaxY = -Infinity;
+    for (const c of chars) {
+      if (c.x < cMinX) cMinX = c.x;
+      if (c.x + c.w > cMaxX) cMaxX = c.x + c.w;
+      if (c.y - c.fontSize < cMinY) cMinY = c.y - c.fontSize;
+      if (c.y + c.fontSize * 0.35 > cMaxY) cMaxY = c.y + c.fontSize * 0.35;
+    }
+
+    if (watermarkEl && Number.isFinite(cMinX) && Number.isFinite(cMaxX)) {
+      const centerX = (cMinX + cMaxX) / 2;
+      const centerY = (cMinY + cMaxY) / 2 + (POEM_WATERMARK_CONFIG.offsetY ?? 0);
+      watermarkEl.style.left = `${Math.round(centerX)}px`;
+      watermarkEl.style.top = `${Math.round(centerY)}px`;
     }
 
     draw(performance.now());

@@ -37,7 +37,8 @@ import {
         <div class="hero-lead">
           <span class="kicker text-sc">Writing about</span>
           <h1 id="heroTitle" class="hero-headline live">
-            Lust, Love,<br />and Memories
+            <span class="hero-line">Lust, Love,</span><br />
+            <span class="hero-line">and Memories</span>
           </h1>
           <p class="hero-sub text-serif-italic">
             Poetry exploring intimacy and relationships.
@@ -349,16 +350,7 @@ import {
     }
 
     .hero-spotlight {
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(
-        ellipse 75% 65% at 30% 50%,
-        rgba(248, 247, 243, 0.88) 0%,
-        rgba(248, 247, 243, 0.45) 50%,
-        rgba(248, 247, 243, 0) 100%
-      );
-      pointer-events: none;
-      z-index: 2;
+      display: none;
     }
 
     .hero-container {
@@ -369,8 +361,14 @@ import {
     }
 
     .hero-lead {
-      max-width: 740px;
+      width: fit-content;
+      max-width: 100%;
       pointer-events: auto;
+    }
+
+    .hero-lead .kicker {
+      display: inline-block;
+      width: fit-content;
     }
 
     .hero-headline {
@@ -382,9 +380,19 @@ import {
       letter-spacing: -0.02em;
       color: var(--ink);
       margin: 0 0 1.3rem;
+      width: fit-content;
+      max-width: 100%;
+    }
+
+    .hero-line {
+      display: inline-block;
+      width: fit-content;
     }
 
     .hero-sub {
+      display: inline-block;
+      width: fit-content;
+      max-width: 100%;
       font-size: clamp(1.15rem, 1.05rem + 0.35vw, 1.4rem);
       color: var(--ink-soft);
       line-height: 1.5;

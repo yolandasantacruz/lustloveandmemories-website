@@ -1,5 +1,18 @@
 import { lerp, seeded, getDpr, NOOP } from '../common/math';
 
+/**
+ * ─── Letter Sea Configuration ────────────────────────────────────────
+ * Controls the distance and behavior of the ambient drifting letter sea.
+ */
+export const LETTER_SEA_CONFIG = {
+  /**
+   * Distance (in pixels) to keep background letters away from foreground text.
+   * - Lower values (~15–20px): letters hug close around the words ("abrazo").
+   * - Higher values (~30–50px): pushes letters further away.
+   */
+  feather: 200
+};
+
 export function initLetterSea(
   cv: HTMLCanvasElement,
   prefersReducedMotion: boolean,
@@ -114,7 +127,7 @@ export function initLetterSea(
     if (typeof document === 'undefined') return;
     const els = Array.from(
       document.querySelectorAll<HTMLElement>(
-        '.hero-lead, .book-feature__content, .book-feature__cover, .author-grid, .shapes-copy, .shapes-canvas-col, .reveal-wrap, .sheet, .walk-canvas, .center-head, .site-header, .site-footer'
+        '.hero-line, .hero-sub, .hero-lead .kicker, .book-feature__content, .book-feature__cover, .author-grid, .shapes-copy, .shapes-canvas-col, .reveal-wrap, .sheet, .walk-canvas, .center-head, .site-header, .site-footer'
       )
     );
     cachedRects = els.map((el) => el.getBoundingClientRect());
@@ -173,7 +186,7 @@ export function initLetterSea(
 
         // Proximity to content transparency — fades out close to text and vanishes underneath
         let contentFade = 1;
-        const feather = 80;
+        const feather = LETTER_SEA_CONFIG.feather;
 
         for (let k = 0; k < cachedRects.length; k++) {
           const rect = cachedRects.at(k);
