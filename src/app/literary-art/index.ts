@@ -16,3 +16,5 @@ export * from './revealing-poem/revealing-poem';
 export * from './gravity-simulation/gravity-simulation';
 export * from './walking-figure/walker.data';
 export * from './walking-figure/walking-figure';
+export * from './writing-figure/writer.data';
+export * from './writing-figure/writing-figure';

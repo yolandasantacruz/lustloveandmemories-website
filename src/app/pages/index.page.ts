@@ -6,7 +6,8 @@ import {
   inject,
   PLATFORM_ID,
   afterNextRender,
-  ChangeDetectionStrategy
+  ChangeDetectionStrategy,
+  DestroyRef
 } from '@angular/core';
 import { isPlatformBrowser, DOCUMENT, NgOptimizedImage } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
@@ -16,6 +17,7 @@ import {
   initRevealingPoem,
   CURATED_POEMS,
   initWalkingFigure,
+  WalkingFigureHandle,
   setupLiveLetters
 } from '../literary-art';
 
@@ -224,48 +226,48 @@ import {
             (submit)="onSendLetter($event)"
             novalidate
           >
-            <label class="sheet-label">
-              <span class="field-title">Your message</span>
-              <textarea
-                name="message"
-                #letterMsg
-                class="letter-textarea"
-                placeholder="Write your note or reflection here..."
-                rows="6"
-              ></textarea>
-            </label>
-
-            <div class="fields">
+            @if (!isSent()) {
               <label class="sheet-label">
-                <span class="field-title">Your name</span>
-                <input #letterName type="text" autocomplete="name" class="sheet-input" placeholder="Name" />
+                <span class="field-title">Your message</span>
+                <textarea
+                  name="message"
+                  #letterMsg
+                  class="letter-textarea"
+                  placeholder="Write your note or reflection here..."
+                  rows="6"
+                ></textarea>
               </label>
+
               <label class="sheet-label">
                 <span class="field-title">Your email</span>
                 <input #letterEmail type="email" autocomplete="email" class="sheet-input" placeholder="email@address.com" />
               </label>
-            </div>
 
-            <div class="send-row">
-              <p class="form-error" role="alert">{{ formError() }}</p>
-              <button type="submit" class="btn">Send Note</button>
-            </div>
+              <div class="send-row">
+                <p class="form-error" role="alert">{{ formError() }}</p>
+                <button type="submit" class="btn">Send Note</button>
+              </div>
+            } @else {
+              <div class="thanks-msg-card">
+                <h3 class="thanks-title text-serif-italic">Thank you for sending your message.</h3>
+                <p class="thanks-body text-body">
+                  I will get back to you as soon as I can. You can also connect directly on Instagram at
+                  <a href="https://www.instagram.com/lustloveandmemories" target="_blank" rel="noopener" class="underline-link">&#64;lustloveandmemories</a>.
+                </p>
+                <div class="thanks-action">
+                  <button type="button" class="btn btn-subtle" (click)="resetForm()">Write another note</button>
+                </div>
+              </div>
+            }
           </form>
-
-          @if (isSent()) {
-            <div class="thanks-msg reveal">
-              <p class="text-serif-italic">Note prepared.</p>
-              <small class="text-body">
-                Your email client is opening with your message. You can also connect directly on Instagram at
-                <a href="https://www.instagram.com/lustloveandmemories" target="_blank" rel="noopener" class="underline-link">&#64;lustloveandmemories</a>.
-              </small>
-            </div>
-          }
         </div>
 
-        <!-- Walking Text Figure alongside note (plain, unencapsulated) -->
+        <!-- Walking Figure with smartphone alongside note (Writing figure preserved in background/code) -->
         <div class="wr-figure-wrap" #walkSection>
+          <!-- Active walking figure canvas -->
           <canvas #walkCanvas class="walk-canvas" aria-hidden="true"></canvas>
+          <!-- Preserved writer canvas (hidden) -->
+          <canvas #writeCanvas class="writer-canvas" style="display:none;" aria-hidden="true"></canvas>
         </div>
       </div>
     </section>
@@ -735,12 +737,15 @@ import {
 
     .wr-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-      gap: clamp(2.5rem, 6vw, 6rem);
-      align-items: center;
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+      gap: clamp(2.5rem, 5vw, 5rem);
+      align-items: stretch;
     }
 
     .sheet-holder {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
       position: relative;
     }
 
@@ -750,6 +755,11 @@ import {
       border-radius: 8px;
       box-shadow: 0 20px 50px -20px rgba(28, 22, 16, 0.10);
       position: relative;
+      min-height: 440px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-sizing: border-box;
     }
 
     .sheet-label {
@@ -822,30 +832,65 @@ import {
       margin: 0;
     }
 
-    .thanks-msg {
-      margin-top: 1.5rem;
-      padding: 1.25rem;
-      background: var(--paper);
-      border-radius: 4px;
+    .thanks-msg-card {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      flex: 1;
+      padding: 1.5rem 0;
     }
-    .thanks-msg p {
-      font-size: 1.15rem;
+
+    .thanks-title {
+      font-size: 1.6rem;
+      font-weight: 400;
       color: var(--ink);
-      margin: 0 0 0.5rem;
+      margin: 0 0 1rem;
+    }
+
+    .thanks-body {
+      font-size: 1.05rem;
+      line-height: 1.7;
+      color: var(--ink-2);
+      margin: 0 0 2rem;
+    }
+
+    .thanks-action {
+      margin-top: auto;
     }
 
     .wr-figure-wrap {
       display: flex;
       justify-content: center;
-      align-items: center;
-      min-height: 380px;
-      background: transparent;
+      align-items: flex-end;
+      padding-bottom: 0;
+      min-height: 440px;
+      position: relative;
+      background: radial-gradient(
+        ellipse 80% 75% at 50% 60%,
+        var(--paper) 0%,
+        var(--paper) 48%,
+        rgba(248, 247, 243, 0.75) 72%,
+        rgba(248, 247, 243, 0) 100%
+      );
+      border-radius: 28px;
     }
 
     .walk-canvas {
-      width: clamp(200px, 22vw, 300px);
+      width: clamp(220px, 25vw, 300px);
       height: auto;
-      aspect-ratio: 100 / 160;
+      aspect-ratio: 100 / 155;
+      display: block;
+      margin: 0 auto;
+      cursor: crosshair;
+      background: transparent;
+      transform: translateX(var(--walk, 0px));
+      transition: transform 0.1s ease-out;
+    }
+
+    .writer-canvas {
+      width: clamp(280px, 32vw, 420px);
+      height: auto;
+      aspect-ratio: 154 / 152;
       display: block;
       margin: 0 auto;
       cursor: crosshair;
@@ -889,6 +934,7 @@ export default class HomeComponent {
   private platformId = inject(PLATFORM_ID);
   private document = inject(DOCUMENT);
   private router = inject(Router);
+  private destroyRef = inject(DestroyRef);
 
   seaCanvas = viewChild<ElementRef<HTMLCanvasElement>>('seaCanvas');
   shapesSection = viewChild<ElementRef<HTMLElement>>('shapesSection');
@@ -899,9 +945,12 @@ export default class HomeComponent {
   revealCanvas = viewChild<ElementRef<HTMLCanvasElement>>('revealCanvas');
   walkCanvas = viewChild<ElementRef<HTMLCanvasElement>>('walkCanvas');
   walkSection = viewChild<ElementRef<HTMLElement>>('walkSection');
+  writeCanvas = viewChild<ElementRef<HTMLCanvasElement>>('writeCanvas');
+  writeSection = viewChild<ElementRef<HTMLElement>>('writeSection');
+
+  private walkerHandle: WalkingFigureHandle | null = null;
 
   letterMsg = viewChild<ElementRef<HTMLTextAreaElement>>('letterMsg');
-  letterName = viewChild<ElementRef<HTMLInputElement>>('letterName');
   letterEmail = viewChild<ElementRef<HTMLInputElement>>('letterEmail');
 
   isFolded = signal(false);
@@ -942,11 +991,14 @@ export default class HomeComponent {
         });
       }
 
-      // 5. Initialize Walking Text Figure in Correspondence section
+      // 5. Initialize Walking Figure with smartphone in Correspondence section (Writer figure preserved)
       const cvWalk = this.walkCanvas()?.nativeElement;
       const walkEl = this.walkSection()?.nativeElement;
       if (cvWalk && walkEl) {
-        initWalkingFigure(cvWalk, walkEl, prefersRM, '#141312');
+        this.walkerHandle = initWalkingFigure(cvWalk, walkEl, prefersRM, '#141312');
+        this.destroyRef.onDestroy(() => {
+          this.walkerHandle?.destroy();
+        });
       }
     });
   }
@@ -954,7 +1006,6 @@ export default class HomeComponent {
   onSendLetter(e: Event) {
     e.preventDefault();
     const msg = this.letterMsg()?.nativeElement.value.trim() ?? '';
-    const name = this.letterName()?.nativeElement.value.trim() ?? '';
     const email = this.letterEmail()?.nativeElement.value.trim() ?? '';
 
     if (!msg) {
@@ -972,8 +1023,11 @@ export default class HomeComponent {
     this.formError.set('');
     this.isFolded.set(true);
 
-    const subject = encodeURIComponent(`Note from ${name || 'Reader'}`);
-    const body = encodeURIComponent(`${msg}\n\n— ${name || 'A reader'}${email ? '\n' + email : ''}`);
+    // Easter egg: Woosh of poetic letters bursting from the smartphone and soaring offscreen right!
+    this.walkerHandle?.sendNote();
+
+    const subject = encodeURIComponent('Note from Reader');
+    const body = encodeURIComponent(`${msg}\n\n— ${email ? 'Reader (' + email + ')' : 'A reader'}`);
     const mailtoUrl = `mailto:lustloveandmemories@gmail.com?subject=${subject}&body=${body}`;
 
     setTimeout(() => {
@@ -982,5 +1036,11 @@ export default class HomeComponent {
         this.document.defaultView.location.href = mailtoUrl;
       }
     }, 1200);
+  }
+
+  resetForm() {
+    this.isSent.set(false);
+    this.isFolded.set(false);
+    this.formError.set('');
   }
 }
