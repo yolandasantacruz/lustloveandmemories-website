@@ -697,11 +697,7 @@ import {
       min-height: 350px;
       margin: 0 auto;
       padding: 0.5rem 1rem 1.35rem;
-      background: radial-gradient(
-        ellipse 65% 55% at 50% 50%,
-        rgba(243, 240, 233, 0.85) 0%,
-        rgba(248, 247, 243, 0) 100%
-      );
+      background: transparent;
       border-radius: 12px;
     }
 
@@ -858,6 +854,38 @@ import {
       line-height: 1.7;
       color: var(--ink-2);
       margin: 0 0 2rem;
+    }
+
+    .underline-link {
+      color: var(--ink-2);
+      font-weight: 400;
+      text-decoration: none;
+      position: relative;
+      display: inline-block;
+      transition: color var(--dur-fast) ease;
+    }
+
+    .underline-link::after {
+      content: '';
+      position: absolute;
+      bottom: 2px;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: var(--ink);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform var(--dur-med) var(--ease-out);
+    }
+
+    .underline-link:hover,
+    .underline-link:focus-visible {
+      color: var(--ink);
+    }
+
+    .underline-link:hover::after,
+    .underline-link:focus-visible::after {
+      transform: scaleX(1);
     }
 
     .thanks-action {

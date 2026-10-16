@@ -8,7 +8,8 @@ import {
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
 import { provideClientHydration, withEventReplay, withNoIncrementalHydration } from '@angular/platform-browser';
-import { provideFileRouter, requestContextInterceptor } from '@analogjs/router';
+import { provideFileRouter, requestContextInterceptor, withExtraRoutes } from '@analogjs/router';
+import { withInMemoryScrolling } from '@angular/router';
 import { provideContent, withMarkdownRenderer } from '@analogjs/content';
 import { withPrismHighlighter } from '@analogjs/content/prism-highlighter';
 import { IMAGE_LOADER, ImageLoaderConfig } from '@angular/common';
@@ -17,7 +18,15 @@ import { OPTIMIZED_IMAGES } from './pages/optimized-images';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideFileRouter(),
+    provideFileRouter(
+      withInMemoryScrolling({ scrollPositionRestoration: 'top' }),
+      withExtraRoutes([
+        {
+          path: 'privacy',
+          loadComponent: () => import('./pages/privacy.page')
+        }
+      ])
+    ),
     provideHttpClient(
       withFetch(),
       withInterceptors([requestContextInterceptor])

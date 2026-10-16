@@ -62,3 +62,6 @@ Thumbs.db
 !*.env.template
 !*.env.defaults
 !*.env.sample
+
+# Angular CLI Local Config
+.angular-config.json

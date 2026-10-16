@@ -1,6 +1,105 @@
 import { CuratedPoem } from './poems.data';
 import { clamp, getDpr, lerp, NOOP } from '../common/math';
 
+/**
+ * ─── Completion Pulsation Configuration ──────────────────────────────
+ * Dual-pulse breath effect (internal color brightening + external halo)
+ * that pulses when the verse is fully uncovered.
+ */
+export const POEM_PULSE_CONFIG = {
+  /** Number of times the glow pulses */
+  pulseCount: 1,
+
+  /** Duration (in ms) of each individual pulse */
+  singlePulseDurationMs: 1200,
+
+  /** Delay (in ms) after the last letter is uncovered before pulsing begins */
+  startDelayMs: 100,
+
+  /**
+   * Internal Glow: whether the text fill brightens during the pulse.
+   * Set to false to keep ink at resting deep black (#141312).
+   */
+  enableInternalGlow: false,
+
+  /**
+   * Internal Glow Color:
+   * 🎨 Click the color box in your editor to open the visual color picker!
+   */
+  internalColor: '#535353ff',
+
+  /**
+   * External Letter Glow: soft, ethereal glow radiating directly out of each letter.
+   */
+  enableExternalGlow: false,
+
+  externalGlow: {
+    /** 🎨 Click the color box in your editor to open the visual color picker! */
+    color: '#ebe6e6ff',
+    blurPx: 30,
+    maxOpacity: 1
+  },
+
+  /**
+   * Sunlight Reflection: specular sheen that sweeps left-to-right across the letters.
+   */
+  sunReflection: {
+    /** Toggle the sun sweep on/off */
+    enabled: true,
+
+    /** Delay (in ms) after poem is revealed before sun sweep begins when glow is off (default: 500ms = half a second) */
+    startDelayMs: 100,
+
+    /** Delay (in ms) after glow finishes before sun sweep begins (used when glow is enabled) */
+    delayAfterGlowMs: 150,
+
+    /** Duration (in ms) for the light to sweep across the text — adjust to make it faster or slower! */
+    durationMs: 1300,
+
+    /**
+     * Peak color of the reflection as it glances across each letter.
+     * 🎨 Click the color box in your editor to open the visual color picker!
+     */
+    color: '#a5a29eff',
+
+    /** Width of the light reflection band (ratio of poem width, default: 0.25) */
+    bandWidthRatio: 0.25,
+
+    /** Diagonal tilt angle (~12° slant like light catching tilted paper) */
+    tilt: 0.18
+  },
+
+  /** Delay (in ms) before the attribution line blooms after completion */
+  attributionDelayMs: 2500
+};
+
+function parseColorToRgb(colorStr: string): { r: number; g: number; b: number } {
+  const str = colorStr.trim();
+  if (str.startsWith('#')) {
+    let c = str.substring(1);
+    if (c.length === 3) {
+      c = c.split('').map((x) => x + x).join('');
+    }
+    const num = parseInt(c.substring(0, 6), 16);
+    if (!Number.isNaN(num)) {
+      return {
+        r: (num >> 16) & 255,
+        g: (num >> 8) & 255,
+        b: num & 255
+      };
+    }
+  }
+  const rgbMatch = str.match(/rgba?\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i);
+  if (rgbMatch) {
+    return {
+      r: parseInt(rgbMatch.at(1) ?? '90', 10),
+      g: parseInt(rgbMatch.at(2) ?? '85', 10),
+      b: parseInt(rgbMatch.at(3) ?? '80', 10)
+    };
+  }
+  return { r: 90, g: 85, b: 80 };
+}
+
 function getBookSlug(bookTitle: string): string {
   if (bookTitle.toLowerCase().includes('longest')) {
     return 'the-longest-nights';
@@ -21,22 +120,22 @@ export function initRevealingPoem(
   // Normalize input into an array of CuratedPoem objects
   const poemsList: CuratedPoem[] = Array.isArray(stanzasOrPoems)
     ? (stanzasOrPoems as (CuratedPoem | string[] | string)[]).map((item) => {
-        if (typeof item === 'object' && item !== null && 'lines' in item) {
-          return item as CuratedPoem;
-        }
-        if (Array.isArray(item)) {
-          return {
-            title: 'Selected Verse',
-            book: 'Lust, Love, and Memories',
-            lines: item as string[]
-          };
-        }
+      if (typeof item === 'object' && item !== null && 'lines' in item) {
+        return item as CuratedPoem;
+      }
+      if (Array.isArray(item)) {
         return {
           title: 'Selected Verse',
           book: 'Lust, Love, and Memories',
-          lines: [String(item)]
+          lines: item as string[]
         };
-      })
+      }
+      return {
+        title: 'Selected Verse',
+        book: 'Lust, Love, and Memories',
+        lines: [String(item)]
+      };
+    })
     : [];
 
   interface CharGlyph {
@@ -85,6 +184,7 @@ export function initRevealingPoem(
   let fadeStartTime = 0;
   let hasStarted = false;
   let lastActivityTime = performance.now();
+  let verseBounds = { minX: 0, maxX: 0, minY: 0, maxY: 0 };
 
   const ptr = { x: -1e4, y: -1e4, px: -1e4, py: -1e4, on: false, hoverBook: false };
 
@@ -136,13 +236,18 @@ export function initRevealingPoem(
 
     // Clean literary attribution (regular, not italic): "[Title] · [Book]"
     ctx!.font = `normal ${citationFontSize}px "EB Garamond", "Iowan Old Style", "Palatino Linotype", "Palatino", Georgia, serif`;
-    const singleLineCitation = `${activePoem.title} · ${activePoem.book}`;
-    const singleWidth = ctx!.measureText(singleLineCitation).width;
+    const spaceW = Math.max(ctx!.measureText(' ').width, Math.round(citationFontSize * 0.32));
+    const dividerSpace = Math.max(spaceW, Math.round(citationFontSize * 0.7)); // Optical 0.9rem equivalent (~15px desktop, ~13px mobile)
+
+    const titleWidth = ctx!.measureText(activePoem.title).width;
+    const dividerWidth = ctx!.measureText('·').width;
+    const bookWidth = ctx!.measureText(activePoem.book).width;
+    const singleWidth = titleWidth + dividerWidth + bookWidth + 2 * dividerSpace;
     const maxCitationWidth = Math.max(120, W - 48);
 
     const citationLines =
       singleWidth <= maxCitationWidth
-        ? [singleLineCitation]
+        ? [`${activePoem.title} · ${activePoem.book}`]
         : [activePoem.title, activePoem.book];
 
     const totalVerseHeight = (verseLines.length - 1) * lineHeight;
@@ -197,18 +302,44 @@ export function initRevealingPoem(
       });
     });
 
+    // Precalculate verse bounding box for completion animations
+    let vMinX = Infinity;
+    let vMaxX = -Infinity;
+    let vMinY = Infinity;
+    let vMaxY = -Infinity;
+    for (const c of chars) {
+      if (!c.isAttribution) {
+        if (c.x < vMinX) vMinX = c.x;
+        if (c.x + c.w > vMaxX) vMaxX = c.x + c.w;
+        if (c.y - c.fontSize < vMinY) vMinY = c.y - c.fontSize;
+        if (c.y + c.fontSize * 0.3 > vMaxY) vMaxY = c.y + c.fontSize * 0.3;
+      }
+    }
+    verseBounds = {
+      minX: Number.isFinite(vMinX) ? vMinX : 0,
+      maxX: Number.isFinite(vMaxX) ? vMaxX : W,
+      minY: Number.isFinite(vMinY) ? vMinY : 0,
+      maxY: Number.isFinite(vMaxY) ? vMaxY : H
+    };
+
     // 2. Layout citation line(s) character-by-character (Regular font, matching .sec-desc size and var(--ink-muted) #78716c)
     citationLines.forEach((cLine, cIdx) => {
       ctx!.font = `normal ${citationFontSize}px "EB Garamond", "Iowan Old Style", "Palatino Linotype", "Palatino", Georgia, serif`;
       const cWords = cLine.split(' ');
-      const spaceW = Math.max(ctx!.measureText(' ').width, Math.round(citationFontSize * 0.32));
+
+      const getSpacingAfter = (wIdx: number): number => {
+        if (wIdx >= cWords.length - 1) return 0;
+        const currentIsDivider = cWords.at(wIdx) === '·';
+        const nextIsDivider = cWords.at(wIdx + 1) === '·';
+        return (currentIsDivider || nextIsDivider) ? dividerSpace : spaceW;
+      };
+
       let totalLineWidth = 0;
-      const wordWidths = cWords.map((w) => {
+      const wordWidths = cWords.map((w, wIdx) => {
         const mw = ctx!.measureText(w).width;
-        totalLineWidth += mw + spaceW;
+        totalLineWidth += mw + getSpacingAfter(wIdx);
         return mw;
       });
-      totalLineWidth -= spaceW;
 
       let currentX = Math.max(16, Math.round((W - totalLineWidth) / 2));
       const y = startY + (verseLines.length - 1) * lineHeight + citationSpacing + cIdx * citationLineHeight;
@@ -251,7 +382,7 @@ export function initRevealingPoem(
           }
         }
         const w = wordWidths.at(wIdx) ?? 28;
-        currentX += w + spaceW;
+        currentX += w + getSpacingAfter(wIdx);
       });
     });
 
@@ -354,9 +485,29 @@ export function initRevealingPoem(
       }
     }
 
-    // 1-second delay after poem is uncovered before fading in the attribution line (title + book)
+    // Timing calculations for completion celebration
+    const completionElapsed = isFullyRevealed && fullyRevealedTime > 0 ? now - fullyRevealedTime : -1;
+    const isGlowActive = POEM_PULSE_CONFIG.enableInternalGlow || POEM_PULSE_CONFIG.enableExternalGlow;
+    const totalPulseMs = isGlowActive ? POEM_PULSE_CONFIG.singlePulseDurationMs * POEM_PULSE_CONFIG.pulseCount : 0;
+    const glowEndMs = isGlowActive ? POEM_PULSE_CONFIG.startDelayMs + totalPulseMs : 0;
+
+    const sunCfg = POEM_PULSE_CONFIG.sunReflection;
+    // When glow is active, starts after glow completes + delayAfterGlowMs.
+    // When glow is off, starts directly after startDelayMs (default: 500ms = half a second)!
+    const sunStartMs = isGlowActive
+      ? glowEndMs + sunCfg.delayAfterGlowMs
+      : sunCfg.startDelayMs;
+    const sunEndMs = sunStartMs + sunCfg.durationMs;
+
+    // Effective attribution delay: ensure it blooms after both glow and sun sweep complete
+    const effectiveAttributionDelay = Math.max(
+      POEM_PULSE_CONFIG.attributionDelayMs,
+      sunCfg.enabled ? sunEndMs + 250 : glowEndMs + 250
+    );
+
+    // Delay after poem is uncovered before fading in the attribution line (title + book)
     if (isFullyRevealed && !isFadingOut && fullyRevealedTime > 0) {
-      if (now - fullyRevealedTime >= 1000) {
+      if (now - fullyRevealedTime >= effectiveAttributionDelay) {
         const attributionChars = chars.filter((c) => c.isAttribution);
         for (const c of attributionChars) {
           c.targetReveal = 1.0;
@@ -401,7 +552,10 @@ export function initRevealingPoem(
 
     const isAttributionVisible =
       prefersReducedMotion ||
-      (isFullyRevealed && fullyRevealedTime > 0 && now - fullyRevealedTime >= 1000 && !isFadingOut);
+      (isFullyRevealed &&
+        fullyRevealedTime > 0 &&
+        now - fullyRevealedTime >= effectiveAttributionDelay &&
+        !isFadingOut);
 
     const isTargetHovered = isAttributionVisible && ptr.hoverBook;
 
@@ -424,6 +578,46 @@ export function initRevealingPoem(
     // Cubic ease-out curve matching site-nav a::after: f(t) = 1 - (1 - t)^3
     const lineProgress = 1 - Math.pow(1 - rawLineProgress, 3);
 
+    // Completion Pulsation (Internal color brightening + external halo breathing)
+    let pulseIntensity = 0;
+    if (
+      !prefersReducedMotion &&
+      !isFadingOut &&
+      isFullyRevealed &&
+      isGlowActive &&
+      completionElapsed >= POEM_PULSE_CONFIG.startDelayMs &&
+      completionElapsed < glowEndMs
+    ) {
+      const elapsedInPulses = completionElapsed - POEM_PULSE_CONFIG.startDelayMs;
+      const cycleT =
+        (elapsedInPulses % POEM_PULSE_CONFIG.singlePulseDurationMs) /
+        POEM_PULSE_CONFIG.singlePulseDurationMs;
+      // Smooth cosine ease-in-out curve: perfectly continuous start, peak, and fade out
+      pulseIntensity = 0.5 - 0.5 * Math.cos(cycleT * 2 * Math.PI);
+    }
+
+    // Sunlight Reflection (Sweeps left-to-right across letters AFTER the glow finishes)
+    let flashX = -9999;
+    let flashBand = 0;
+    const isSunSweeping =
+      !prefersReducedMotion &&
+      !isFadingOut &&
+      isFullyRevealed &&
+      sunCfg.enabled &&
+      completionElapsed >= sunStartMs &&
+      completionElapsed <= sunEndMs;
+
+    if (isSunSweeping) {
+      flashBand = Math.max(75, Math.min(130, (verseBounds.maxX - verseBounds.minX) * sunCfg.bandWidthRatio));
+      const tFlash = (completionElapsed - sunStartMs) / sunCfg.durationMs;
+      // Smooth ease across the page
+      const easeFlash = tFlash < 0.5 ? 2 * tFlash * tFlash : 1 - Math.pow(-2 * tFlash + 2, 2) / 2;
+      const totalSpan = (verseBounds.maxX - verseBounds.minX) + flashBand * 2 + 80;
+      flashX = verseBounds.minX - flashBand - 40 + totalSpan * easeFlash;
+    }
+
+
+
     // Render characters
     for (const c of chars) {
       if (!prefersReducedMotion) {
@@ -431,8 +625,8 @@ export function initRevealingPoem(
           if (!isFullyRevealed || fullyRevealedTime <= 0) {
             c.reveal = 0;
           } else {
-            // 200% longer transition (~1.6s smooth literary fade-in) after the 1s delay
-            const elapsed = (now - fullyRevealedTime) - 1000;
+            // Smooth literary fade-in after the attribution delay
+            const elapsed = (now - fullyRevealedTime) - effectiveAttributionDelay;
             if (elapsed <= 0) {
               c.reveal = 0;
             } else {
@@ -455,6 +649,55 @@ export function initRevealingPoem(
       ctx.font = `${fontStyle} ${c.fontSize}px "EB Garamond", "Iowan Old Style", "Palatino Linotype", "Palatino", Georgia, serif`;
 
       let charColor = c.color ?? color;
+      if (!c.isAttribution && pulseIntensity > 0.005) {
+        if (POEM_PULSE_CONFIG.enableInternalGlow) {
+          // Internal glow: text fill subtly brightens to a lighter shade
+          const intRgb = parseColorToRgb(POEM_PULSE_CONFIG.internalColor);
+          const r = Math.round(20 + (intRgb.r - 20) * pulseIntensity);
+          const g = Math.round(19 + (intRgb.g - 19) * pulseIntensity);
+          const b = Math.round(18 + (intRgb.b - 18) * pulseIntensity);
+          charColor = `rgb(${r}, ${g}, ${b})`;
+        }
+
+        // External glow: direct multi-tier Gaussian bloom emanating from each letterform
+        const { color: glowColorStr, blurPx, maxOpacity } = POEM_PULSE_CONFIG.externalGlow;
+        const glowAlpha = clamp(pulseIntensity * maxOpacity * alpha, 0, 1);
+        if (POEM_PULSE_CONFIG.enableExternalGlow && glowAlpha > 0.01) {
+          const { r: gr, g: gg, b: gb } = parseColorToRgb(glowColorStr);
+          ctx.save();
+          ctx.shadowOffsetX = 0;
+          ctx.shadowOffsetY = 0;
+          ctx.fillStyle = charColor;
+          ctx.globalAlpha = clamp(alpha, 0, 1);
+
+          // Tier 1: Wide ethereal bloom feathering out into the paper
+          ctx.shadowColor = `rgba(${gr}, ${gg}, ${gb}, ${(glowAlpha * 0.6).toFixed(3)})`;
+          ctx.shadowBlur = blurPx;
+          ctx.fillText(c.ch, c.x, c.y);
+
+          // Tier 2: Rich, dense core halo hugging the curves and serifs of the letter
+          ctx.shadowColor = `rgba(${gr}, ${gg}, ${gb}, ${glowAlpha.toFixed(3)})`;
+          ctx.shadowBlur = Math.max(2, Math.round(blurPx * 0.4));
+          ctx.fillText(c.ch, c.x, c.y);
+
+          ctx.restore();
+        }
+      }
+
+      // Sunlight Reflection: specular sheen sweeping left-to-right across the text AFTER glow finishes
+      if (!c.isAttribution && isSunSweeping && flashX > -9000) {
+        const charEffectiveX = (c.x + c.w / 2) + (c.y - verseBounds.minY) * sunCfg.tilt;
+        const dist = Math.abs(charEffectiveX - flashX);
+        if (dist < flashBand) {
+          const flashIntensity = Math.pow(1 - dist / flashBand, 1.8);
+          const sunRgb = parseColorToRgb(sunCfg.color);
+          const r = Math.round(20 + (sunRgb.r - 20) * flashIntensity);
+          const g = Math.round(19 + (sunRgb.g - 19) * flashIntensity);
+          const b = Math.round(18 + (sunRgb.b - 18) * flashIntensity);
+          charColor = `rgb(${r}, ${g}, ${b})`;
+        }
+      }
+
       if (c.isBookTitle && colorProgress > 0.005) {
         // Smooth ease-out for color fade
         const easeColor = colorProgress * (2 - colorProgress);
@@ -532,7 +775,7 @@ export function initRevealingPoem(
     const now = performance.now();
     const isAttributionVisible =
       prefersReducedMotion ||
-      (isFullyRevealed && fullyRevealedTime > 0 && now - fullyRevealedTime >= 1000 && !isFadingOut);
+      (isFullyRevealed && fullyRevealedTime > 0 && now - fullyRevealedTime >= 1200 && !isFadingOut);
 
     if (isAttributionVisible && bookBounds) {
       const isOverBook =

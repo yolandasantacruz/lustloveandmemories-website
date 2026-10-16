@@ -1,6 +1,7 @@
 import { Component, HostListener, signal, PLATFORM_ID, inject, afterNextRender, ChangeDetectionStrategy } from '@angular/core';
 import { isPlatformBrowser, DOCUMENT } from '@angular/common';
-import { RouterLink, RouterOutlet, Router } from '@angular/router';
+import { RouterLink, RouterOutlet, Router, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -92,28 +93,34 @@ import { RouterLink, RouterOutlet, Router } from '@angular/router';
     <!-- ─── Footer ───────────────────────────────────── -->
     <footer class="site-footer">
       <div class="container footer-inner">
-        <div class="footer-grid">
-          <div class="footer-col footer-col--brand">
-            <span class="footer-brand">Yolanda Santa Cruz</span>
-            <p class="footer-tagline text-serif-italic">
-              Poet and artist exploring the spectrum of intimacy within relationships.
-            </p>
-          </div>
+        <div class="footer-row">
+          <p class="footer-copy">
+            <span>&copy; {{ year }}, Yolanda Santa Cruz</span>
+            <span class="footer-sep" aria-hidden="true">&middot;</span>
+            <span>All rights reserved</span>
+          </p>
 
-          <div class="footer-col footer-col--inquiry">
-            <div class="footer-inquiry-main">
-              <p class="footer-text">For readings, collaborations, and press:</p>
-              <a
-                href="https://www.instagram.com/lustloveandmemories"
-                target="_blank"
-                rel="noopener"
-                class="footer-link"
-              >
-                &#64;lustloveandmemories
-              </a>
-            </div>
-
-            <p class="footer-copy">&copy; {{ year }} &middot; All rights reserved</p>
+          <div class="footer-links">
+            <a
+              href="https://www.instagram.com/lustloveandmemories"
+              target="_blank"
+              rel="noopener"
+              class="footer-link"
+              aria-label="Instagram @lustloveandmemories"
+            >
+              <svg class="footer-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+              </svg>
+              <span>&#64;lustloveandmemories</span>
+            </a>
+            <span class="footer-sep" aria-hidden="true">&middot;</span>
+            <a
+              routerLink="/privacy"
+              (click)="onPrivacyClick($event)"
+              class="footer-link"
+            ><span>Privacy</span></a>
           </div>
         </div>
       </div>
@@ -218,7 +225,7 @@ import { RouterLink, RouterOutlet, Router } from '@angular/router';
       font-size: 0.7rem;
       pointer-events: none;
       user-select: none;
-      opacity: 0.6;
+      opacity: 0.5;
     }
 
     .site-nav a {
@@ -330,8 +337,8 @@ import { RouterLink, RouterOutlet, Router } from '@angular/router';
     /* ─── Footer ─────────────────────────────────────── */
     .site-footer {
       background: var(--paper-2);
-      border-top: none;
-      padding: clamp(4rem, 7vh, 6rem) 0 clamp(3.5rem, 6vh, 5rem);
+      border-top: 1px solid var(--rule-soft);
+      padding: clamp(2.25rem, 4vh, 3.25rem) 0;
       margin-top: auto;
     }
 
@@ -340,89 +347,93 @@ import { RouterLink, RouterOutlet, Router } from '@angular/router';
       flex-direction: column;
     }
 
-    .footer-grid {
-      display: grid;
-      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-      gap: clamp(2.5rem, 6vw, 6rem);
-      align-items: stretch;
-    }
-
-    .footer-col {
+    .footer-row {
       display: flex;
-      flex-direction: column;
-    }
-
-    .footer-col--brand {
-      gap: 0.75rem;
-    }
-
-    .footer-brand {
-      font-family: var(--font-display);
-      font-size: 1.45rem;
-      font-weight: 400;
-      color: var(--ink);
-      line-height: 1.15;
-      letter-spacing: -0.01em;
-    }
-
-    .footer-tagline {
-      font-size: 0.92rem;
-      color: var(--ink-soft);
-      line-height: 1.6;
-      margin: 0;
-      max-width: 360px;
-    }
-
-    .footer-col--inquiry {
       justify-content: space-between;
-      gap: 2.25rem;
-    }
-
-    .footer-inquiry-main {
-      display: flex;
-      flex-direction: column;
-      gap: 0.45rem;
-    }
-
-    .footer-text {
-      font-family: var(--font-body);
-      font-size: 0.88rem;
-      color: var(--ink-soft);
-      line-height: 1.5;
-      margin: 0;
-    }
-
-    .footer-link {
-      font-family: var(--font-body);
-      font-size: 0.92rem;
-      color: var(--ink);
-      text-decoration: none;
-      border-bottom: 1px solid transparent;
-      padding-bottom: 2px;
-      width: fit-content;
-      transition: border-color var(--dur-fast) ease;
-    }
-    .footer-link:hover {
-      color: var(--ink);
-      border-bottom-color: var(--ink);
+      align-items: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
     }
 
     .footer-copy {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.9rem;
       font-family: var(--font-body);
-      font-size: 0.78rem;
-      color: var(--ink-muted);
+      font-size: 0.84rem;
+      color: var(--ink-3);
       margin: 0;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.02em;
+    }
+
+    .footer-links {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+    }
+
+    .footer-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-family: var(--font-body);
+      font-size: 0.84rem;
+      color: var(--ink-2);
+      text-decoration: none;
+      transition: color var(--dur-fast) ease;
+    }
+
+    .footer-link span {
+      position: relative;
+      display: inline-block;
+    }
+
+    .footer-link span::after {
+      content: '';
+      position: absolute;
+      bottom: 2px;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: var(--ink);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform var(--dur-med) var(--ease-out);
+    }
+
+    .footer-icon {
+      opacity: 0.75;
+      transition: opacity var(--dur-fast) ease;
+    }
+
+    .footer-link:hover,
+    .footer-link:focus-visible {
+      color: var(--ink);
+    }
+
+    .footer-link:hover .footer-icon,
+    .footer-link:focus-visible .footer-icon {
+      opacity: 1;
+    }
+
+    .footer-link:hover span::after,
+    .footer-link:focus-visible span::after {
+      transform: scaleX(1);
+    }
+
+    .footer-sep {
+      color: var(--ink-muted);
+      font-size: 0.84rem;
+      user-select: none;
+      opacity: 0.5;
     }
 
     @media (max-width: 700px) {
-      .footer-grid {
-        grid-template-columns: 1fr;
-        gap: 2.5rem;
-      }
-      .footer-col--inquiry {
-        justify-content: flex-start;
-        gap: 2rem;
+      .footer-row {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 1rem;
       }
     }
 
@@ -557,13 +568,39 @@ export class App {
   readonly scrolled = signal(false);
   readonly navHidden = signal(false);
   readonly menuOpen = signal(false);
-  readonly activeSection = signal<'top' | 'works' | 'author'>('top');
+  readonly activeSection = signal<'top' | 'works' | 'author' | null>(null);
   private platformId = inject(PLATFORM_ID);
   private document = inject(DOCUMENT);
   private router = inject(Router);
   private lastScrollY = 0;
 
   constructor() {
+    this.router.events
+      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+      .subscribe((event) => {
+        this.navHidden.set(false);
+        this.closeMenu();
+
+        const url = event.urlAfterRedirects || event.url;
+        const isHome = url === '/' || url === '' || url.startsWith('/#') || url.startsWith('/?');
+        if (!isHome) {
+          this.activeSection.set(null);
+        } else {
+          this.activeSection.set('top');
+        }
+
+        if (isPlatformBrowser(this.platformId)) {
+          const win = this.document.defaultView;
+          win?.scrollTo({ top: 0, behavior: 'instant' });
+          if (this.document.documentElement) {
+            this.document.documentElement.scrollTop = 0;
+          }
+          if (this.document.body) {
+            this.document.body.scrollTop = 0;
+          }
+        }
+      });
+
     afterNextRender(() => {
       const windowRef = this.document.defaultView as unknown as {
         dataLayer?: unknown[];
@@ -586,6 +623,53 @@ export class App {
       script.src = 'https://www.googletagmanager.com/gtag/js?id=G-Q6G685702D';
       script.setAttribute('fetchpriority', 'low');
       this.document.head.appendChild(script);
+
+      // Verify initial route to set neutral navigation on non-home pages
+      const win = this.document.defaultView;
+      if (win && win.location.pathname !== '/') {
+        this.activeSection.set(null);
+      }
+    });
+  }
+
+  onPrivacyClick(event?: Event) {
+    if (event) {
+      event.preventDefault();
+    }
+    this.closeMenu();
+    this.navHidden.set(false);
+    this.scrolled.set(false);
+
+    const performTopScroll = () => {
+      if (isPlatformBrowser(this.platformId)) {
+        const win = this.document.defaultView;
+        win?.scrollTo({ top: 0, behavior: 'instant' });
+        if (this.document.documentElement) {
+          this.document.documentElement.scrollTop = 0;
+        }
+        if (this.document.body) {
+          this.document.body.scrollTop = 0;
+        }
+      }
+    };
+
+    performTopScroll();
+
+    this.router.navigateByUrl('/privacy').then((success) => {
+      performTopScroll();
+      if (!success && isPlatformBrowser(this.platformId)) {
+        const win = this.document.defaultView;
+        if (win && win.location.pathname !== '/privacy') {
+          win.location.href = '/privacy';
+        }
+      }
+    }).catch(() => {
+      if (isPlatformBrowser(this.platformId)) {
+        const win = this.document.defaultView;
+        if (win) {
+          win.location.href = '/privacy';
+        }
+      }
     });
   }
 
@@ -622,6 +706,13 @@ export class App {
       }
 
       this.lastScrollY = Math.max(0, currentY);
+
+      // Only perform in-page section highlighting when on the home page
+      const currentPath = windowRef.location.pathname;
+      if (currentPath !== '/') {
+        this.activeSection.set(null);
+        return;
+      }
 
       // Smooth section highlighting based on scroll position
       const worksEl = this.document.getElementById('works');
