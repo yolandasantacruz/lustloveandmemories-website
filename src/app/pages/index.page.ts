@@ -37,7 +37,7 @@ import {
         <div class="hero-lead">
           <span class="kicker text-sc">Writing about</span>
           <h1 id="heroTitle" class="hero-headline live">
-            Lust, Love, and Memories
+            Lust, Love,<br />and Memories
           </h1>
           <p class="hero-sub text-serif-italic">
             Poetry on desire, connection, and the aftermath of relationships.
