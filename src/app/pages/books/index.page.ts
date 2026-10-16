@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, PLATFORM_ID, inject } from '@angular/core';
+import { Component, AfterViewInit, PLATFORM_ID, inject, ChangeDetectionStrategy } from '@angular/core';
 import { isPlatformBrowser, DOCUMENT, NgOptimizedImage } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { injectContentFiles } from '@analogjs/content';
@@ -75,6 +75,7 @@ import BookAttributes from '../../book-attributes';
       </div>
     </section>
   `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
     /* ═══ HERO ══════════════════════════════════════════════════ */
     .books-hero {

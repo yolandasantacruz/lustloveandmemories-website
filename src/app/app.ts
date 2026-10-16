@@ -1,4 +1,4 @@
-import { Component, HostListener, signal, PLATFORM_ID, inject, afterNextRender } from '@angular/core';
+import { Component, HostListener, signal, PLATFORM_ID, inject, afterNextRender, ChangeDetectionStrategy } from '@angular/core';
 import { isPlatformBrowser, DOCUMENT } from '@angular/common';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
@@ -68,6 +68,7 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
       </div>
     </footer>
   `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
     :host {
       display: flex;

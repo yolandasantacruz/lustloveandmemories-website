@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { injectContent, MarkdownComponent } from '@analogjs/content';
@@ -61,6 +61,7 @@ import BookAttributes from '../../book-attributes';
       </article>
     }
   `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
     .book-detail { background: var(--paper); min-height: 100vh; }
 

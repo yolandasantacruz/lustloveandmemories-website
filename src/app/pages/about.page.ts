@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, PLATFORM_ID, inject } from '@angular/core';
+import { Component, AfterViewInit, PLATFORM_ID, inject, ChangeDetectionStrategy } from '@angular/core';
 import { isPlatformBrowser, DOCUMENT, NgOptimizedImage } from '@angular/common';
 
 @Component({
@@ -130,6 +130,7 @@ import { isPlatformBrowser, DOCUMENT, NgOptimizedImage } from '@angular/common';
       </div>
     </section>
   `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
     /* ═══ HERO ════════════════════════════════════════════════ */
     .about-hero {
