@@ -615,12 +615,7 @@ import {
       height: auto;
       border-radius: 6px;
       box-shadow: 0 18px 42px -12px rgba(20, 19, 18, 0.20), 0 4px 12px rgba(20, 19, 18, 0.06);
-      transition: transform var(--dur-med) var(--ease-out), box-shadow var(--dur-med) var(--ease-out);
       display: block;
-    }
-    .book-img:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 24px 50px -12px rgba(20, 19, 18, 0.26);
     }
 
     .book-feature__content {
