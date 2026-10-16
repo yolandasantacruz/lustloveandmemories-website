@@ -116,63 +116,32 @@ import {
       </div>
     </section>
 
-    <!-- ═══ 3. SHAPES IN TEXT (TRANSPARENT TYPOGRAPHIC SILHOUETTES) ═════ -->
-    <section class="sec shapes-section" id="shapes" aria-labelledby="shapesH" #shapesSection>
-      <div class="container shapes-grid">
-        <div class="shapes-copy">
-          <span class="kicker text-sc">Metamorphosis</span>
-          <h2 id="shapesH" class="sec-title live">Shapes in text</h2>
-          <p class="shapes-main">
-            Letters gathering into silhouettes shaped by memory.
-          </p>
-          <p class="shapes-sub text-serif-italic" #figCaption aria-live="polite">
-            Tap the figure to rearrange its verses.
-          </p>
-        </div>
-
-        <div class="shapes-canvas-col">
-          <div class="shapes-frame">
-            <canvas #figCanvas class="fig-canvas" aria-hidden="true"></canvas>
-            <button #figBtn type="button" class="fig-btn" aria-label="Rearrange letters into a new figure"></button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ═══ 4. THE AUTHOR (MINIMALIST LITERARY STATEMENT) ═══════════════ -->
-    <section class="sec author-section" id="author" aria-labelledby="authorH">
-      <div class="container author-grid">
-        <div class="author-photo-wrap">
-          <img
-            ngSrc="images/yolanda-portrait.webp"
-            ngSrcset="400w, 800w, 1200w"
-            sizes="(max-width: 768px) 100vw, 400px"
-            width="768"
-            height="1024"
-            alt="Portrait of Yolanda Santa Cruz"
-            class="author-photo"
-            loading="lazy"
-          />
-        </div>
-
-        <div class="author-text">
-          <span class="kicker text-sc">The Author</span>
-          <h2 id="authorH" class="sec-title live">
-            Behind the Letters
-          </h2>
-          <div class="author-statement">
-            <p class="author-summary">
-              Art is approached as a catalyst that heals and uplifts both creator and reader. Rooted in personal memory, the poetry explores moments where emotion demanded quiet honesty—balancing raw confessional intimacy with the visual architecture of words on paper.
+    <!-- ═══ 3. SHAPES IN TEXT (METAMORPHOSIS - HIDDEN FOR NOW) ═════ -->
+    @if (false) {
+      <section class="sec shapes-section" id="shapes" aria-labelledby="shapesH" #shapesSection>
+        <div class="container shapes-grid">
+          <div class="shapes-copy">
+            <span class="kicker text-sc">Metamorphosis</span>
+            <h2 id="shapesH" class="sec-title live">Shapes in text</h2>
+            <p class="shapes-main">
+              Letters gathering into silhouettes shaped by memory.
             </p>
-            <p class="author-details">
-              Awarded first place at the University of Talarrubias poetry contest, merit honors at the XVII Castello di Duino International Competition, and published in literary reviews including <em>Revista Literaria Visor</em> and <em>Carpa de Sueños</em>.
+            <p class="shapes-sub text-serif-italic" #figCaption aria-live="polite">
+              Tap the figure to rearrange its verses.
             </p>
           </div>
-        </div>
-      </div>
-    </section>
 
-    <!-- ═══ 6. UNCOVER THE POEM (ATMOSPHERIC REVEALING POETRY CANVAS) ══ -->
+          <div class="shapes-canvas-col">
+            <div class="shapes-frame">
+              <canvas #figCanvas class="fig-canvas" aria-hidden="true"></canvas>
+              <button #figBtn type="button" class="fig-btn" aria-label="Rearrange letters into a new figure"></button>
+            </div>
+          </div>
+        </div>
+      </section>
+    }
+
+    <!-- ═══ 4. UNCOVER THE POEM (ATMOSPHERIC REVEALING POETRY CANVAS) ══ -->
     <section class="sec reveal-section" id="poetry" aria-labelledby="revealH">
       <div class="container center-head">
         <span class="kicker text-sc">Poetry</span>
@@ -195,6 +164,39 @@ import {
             I will always make time for emotions, and that’s how this book came to be. — For Emotions · Lust, Love, and Memories.
             Softness is my soft spot. We were creating art. — Soft Spot · Lust, Love, and Memories.
           </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ 5. THE AUTHOR (MINIMALIST LITERARY STATEMENT) ═══════════════ -->
+    <section class="sec author-section" id="author" aria-labelledby="authorH">
+      <div class="container author-grid">
+        <div class="author-photo-wrap">
+          <img
+            ngSrc="images/yolanda-portrait.webp"
+            ngSrcset="400w, 800w, 1200w"
+            sizes="(max-width: 768px) 100vw, 400px"
+            width="768"
+            height="1024"
+            alt="Portrait of Yolanda Santa Cruz"
+            class="author-photo"
+            loading="lazy"
+          />
+        </div>
+
+        <div class="author-text">
+          <span class="kicker text-sc">The Author</span>
+          <h2 id="authorH" class="sec-title live">
+            Behind the Letters
+          </h2>
+          <div class="author-statement">
+            <p class="author-summary">
+              Rooted in personal experience, my poetry explores moments where writing became my preferred way to process feelings and thoughts.
+            </p>
+            <p class="author-details">
+              Awarded first place at the University of Talarrubias poetry contest, merit honors at the XVII Castello di Duino International Competition, and published in literary reviews including <em>Revista Literaria Visor</em> and <em>Carpa de Sueños</em>.
+            </p>
+          </div>
         </div>
       </div>
     </section>
