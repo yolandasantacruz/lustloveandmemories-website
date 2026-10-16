@@ -153,6 +153,15 @@ import {
 
       <div class="container">
         <div class="reveal-wrap">
+          <img
+            ngSrc="images/ink-watermark.webp"
+            width="740"
+            height="740"
+            alt=""
+            aria-hidden="true"
+            class="poem-watermark"
+            priority
+          />
           <canvas #revealCanvas class="reveal-canvas" aria-hidden="true"></canvas>
           <p class="sr-only">
             Whenever I want to write you, I write me. — How My Poems Are Created · Lust, Love, and Memories.
@@ -701,7 +710,24 @@ import {
       border-radius: 12px;
     }
 
+    .poem-watermark {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: clamp(380px, 48vw, 580px);
+      max-width: none;
+      height: auto;
+      opacity: 0.048; /* Reduced by 25% from 0.065 for gentle, sophisticated contrast */
+      pointer-events: none;
+      user-select: none;
+      z-index: 0;
+      transition: opacity 0.4s ease;
+    }
+
     .reveal-canvas {
+      position: relative;
+      z-index: 1;
       width: 100%;
       height: clamp(320px, 38vw, 400px);
       cursor: url('/images/quill-cursor.png') 0 52, crosshair;

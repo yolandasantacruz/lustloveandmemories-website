@@ -48,10 +48,10 @@ export const POEM_PULSE_CONFIG = {
     enabled: true,
 
     /** Delay (in ms) after poem is revealed before sun sweep begins when glow is off (default: 500ms = half a second) */
-    startDelayMs: 100,
+    startDelayMs: 10,
 
     /** Delay (in ms) after glow finishes before sun sweep begins (used when glow is enabled) */
-    delayAfterGlowMs: 150,
+    delayAfterGlowMs: 50,
 
     /** Duration (in ms) for the light to sweep across the text — adjust to make it faster or slower! */
     durationMs: 1300,
@@ -60,17 +60,44 @@ export const POEM_PULSE_CONFIG = {
      * Peak color of the reflection as it glances across each letter.
      * 🎨 Click the color box in your editor to open the visual color picker!
      */
-    color: '#a5a29eff',
+    color: '#7c7a78ff',
 
     /** Width of the light reflection band (ratio of poem width, default: 0.25) */
     bandWidthRatio: 0.25,
 
     /** Diagonal tilt angle (~12° slant like light catching tilted paper) */
-    tilt: 0.18
+    tilt: 0.6
   },
 
   /** Delay (in ms) before the attribution line blooms after completion */
-  attributionDelayMs: 2500
+  attributionDelayMs: 1000
+};
+
+/**
+ * ─── Parchment Ink Watermark Configuration ──────────────────────────
+ * Delicate literary watermark (ink wash / splatter) marking the
+ * poetic space on the blank parchment before letters are uncovered.
+ */
+export const POEM_WATERMARK_CONFIG = {
+  /** Toggle the ink watermark on/off */
+  enabled: true,
+
+  /**
+   * Resting opacity of the watermark on the paper (0.01 to 0.20).
+   * 0.048 is 25% lower than 0.065 for gentle, sophisticated contrast.
+   */
+  opacity: 0.03,
+
+  /**
+   * Whether the watermark softly dims when the user uncovers the poem,
+   * keeping the focus purely on the dark ink typography.
+   */
+  dimOnReveal: true,
+
+  /**
+   * Opacity of the watermark once the poem is fully uncovered (if dimOnReveal is true).
+   */
+  revealedOpacity: 0.024
 };
 
 function parseColorToRgb(colorStr: string): { r: number; g: number; b: number } {
@@ -185,6 +212,7 @@ export function initRevealingPoem(
   let hasStarted = false;
   let lastActivityTime = performance.now();
   let verseBounds = { minX: 0, maxX: 0, minY: 0, maxY: 0 };
+  const watermarkEl = cv.parentElement?.querySelector<HTMLElement>('.poem-watermark');
 
   const ptr = { x: -1e4, y: -1e4, px: -1e4, py: -1e4, on: false, hoverBook: false };
 
@@ -425,6 +453,13 @@ export function initRevealingPoem(
     isFadingOut = false;
     hasStarted = false;
 
+    if (watermarkEl && verseBounds.maxX > verseBounds.minX) {
+      const centerX = (verseBounds.minX + verseBounds.maxX) / 2;
+      const centerY = (verseBounds.minY + verseBounds.maxY) / 2;
+      watermarkEl.style.left = `${centerX}px`;
+      watermarkEl.style.top = `${centerY}px`;
+    }
+
     draw(performance.now());
   }
 
@@ -434,6 +469,39 @@ export function initRevealingPoem(
     ctx.clearRect(0, 0, cv.width, cv.height);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.textBaseline = 'alphabetic';
+
+    // Calculate fade-out multiplier if in fadingOut state
+    let fadeMultiplier = 1.0;
+    if (isFadingOut) {
+      const elapsed = now - fadeStartTime;
+      const FADE_DURATION = 2000;
+      fadeMultiplier = Math.max(0, 1 - elapsed / FADE_DURATION);
+
+      if (fadeMultiplier <= 0) {
+        // Transition to next poem segment
+        currentPoemIdx = (currentPoemIdx + 1) % poemsList.length;
+        layoutCurrentPoem();
+        return;
+      }
+    }
+
+    // Sync Ink Splatter Watermark opacity with reveal state (overflowing DOM element)
+    if (watermarkEl && POEM_WATERMARK_CONFIG.enabled) {
+      let currentOpacity = POEM_WATERMARK_CONFIG.opacity;
+      if (POEM_WATERMARK_CONFIG.dimOnReveal && hasStarted) {
+        const verseChars = chars.filter((c) => !c.isAttribution && c.ch.trim().length > 0);
+        const revealedCount = verseChars.filter((c) => c.revealed).length;
+        const totalCount = Math.max(1, verseChars.length);
+        const revealProgress = Math.min(1, revealedCount / totalCount);
+        currentOpacity = lerp(
+          POEM_WATERMARK_CONFIG.opacity,
+          POEM_WATERMARK_CONFIG.revealedOpacity,
+          revealProgress
+        );
+      }
+      const finalAlpha = currentOpacity * fadeMultiplier;
+      watermarkEl.style.opacity = finalAlpha.toFixed(4);
+    }
 
     // Precise letter-by-letter quill uncover (no wide radial spill)
     if (!prefersReducedMotion && ptr.on && !isFadingOut) {
@@ -529,21 +597,6 @@ export function initRevealingPoem(
       if (now - lastActivityTime > 40000) {
         isFadingOut = true;
         fadeStartTime = now;
-      }
-    }
-
-    // Calculate fade-out multiplier if in fadingOut state
-    let fadeMultiplier = 1.0;
-    if (isFadingOut) {
-      const elapsed = now - fadeStartTime;
-      const FADE_DURATION = 2000;
-      fadeMultiplier = Math.max(0, 1 - elapsed / FADE_DURATION);
-
-      if (fadeMultiplier <= 0) {
-        // Transition to next poem segment
-        currentPoemIdx = (currentPoemIdx + 1) % poemsList.length;
-        layoutCurrentPoem();
-        return;
       }
     }
 
