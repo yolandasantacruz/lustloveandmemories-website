@@ -35,16 +35,13 @@ import {
 
       <div class="container hero-container">
         <div class="hero-lead">
-          <span class="kicker text-sc">Two Poetry Collections</span>
+          <span class="kicker text-sc">Writing about</span>
           <h1 id="heroTitle" class="hero-headline live">
-            Writing about Lust, Love, and Memories
+            Lust, Love, and Memories
           </h1>
           <p class="hero-sub text-serif-italic">
             Poetry on desire, connection, and the aftermath of relationships.
           </p>
-          <div class="hero-actions">
-            <a href="#works" class="btn">Explore Collections</a>
-          </div>
         </div>
       </div>
     </section>
@@ -170,9 +167,6 @@ import {
             <p class="author-details">
               Awarded first place at the University of Talarrubias poetry contest, merit honors at the XVII Castello di Duino International Competition, and published in literary reviews including <em>Revista Literaria Visor</em> and <em>Carpa de Sueños</em>.
             </p>
-            <div class="author-meta">
-              <a routerLink="/about" class="text-link">Biography &amp; Publications</a>
-            </div>
           </div>
         </div>
       </div>
@@ -988,7 +982,12 @@ export default class HomeComponent {
       const cvRev = this.revealCanvas()?.nativeElement;
       if (cvRev) {
         initRevealingPoem(cvRev, CURATED_POEMS, prefersRM, '#141312', (url) => {
-          this.router.navigateByUrl(url);
+          if (url.startsWith('#')) {
+            const targetEl = this.document.getElementById(url.substring(1));
+            targetEl?.scrollIntoView({ behavior: 'smooth' });
+          } else {
+            this.router.navigateByUrl(url);
+          }
         });
       }
 

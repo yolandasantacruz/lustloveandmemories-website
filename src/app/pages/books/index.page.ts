@@ -1,9 +1,15 @@
 import { Component, AfterViewInit, PLATFORM_ID, inject, ChangeDetectionStrategy } from '@angular/core';
 import { isPlatformBrowser, DOCUMENT, NgOptimizedImage } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { RouteMeta } from '@analogjs/router';
 import { injectContentFiles } from '@analogjs/content';
 
 import BookAttributes from '../../book-attributes';
+
+export const routeMeta: RouteMeta = {
+  redirectTo: '/',
+  pathMatch: 'full',
+};
 
 @Component({
   selector: 'app-books',

@@ -1,9 +1,15 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { RouteMeta } from '@analogjs/router';
 import { injectContent, MarkdownComponent } from '@analogjs/content';
 
 import BookAttributes from '../../book-attributes';
+
+export const routeMeta: RouteMeta = {
+  redirectTo: '/',
+  pathMatch: 'full',
+};
 
 @Component({
   selector: 'app-book',

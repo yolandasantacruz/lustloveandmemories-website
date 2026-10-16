@@ -95,7 +95,7 @@ export default defineConfig(({ mode }) => ({
         highlighter: 'prismjs',
       },
       prerender: {
-        routes: ['/', '/books', '/about', '/books/lust-love-and-memories', '/books/the-longest-nights'],
+        routes: ['/'],
         sitemap: {
           host: 'https://lustloveandmemories.com',
         },

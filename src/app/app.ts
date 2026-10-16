@@ -1,6 +1,6 @@
 import { Component, HostListener, signal, PLATFORM_ID, inject, afterNextRender, ChangeDetectionStrategy } from '@angular/core';
 import { isPlatformBrowser, DOCUMENT } from '@angular/common';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { RouterLink, RouterLinkActive, RouterOutlet, Router } from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -9,16 +9,16 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
     <!-- ─── Navigation ──────────────────────────────── -->
     <header class="site-header" [class.scrolled]="scrolled()" [class.nav--hidden]="navHidden()">
       <div class="nav-inner">
-        <a routerLink="/" class="brand" aria-label="Home">
+        <a routerLink="/" class="brand" aria-label="Home" (click)="scrollTo('top', $event)">
           <span class="brand__title">Yolanda Santa Cruz</span>
         </a>
 
         <nav class="site-nav" [class.is-open]="menuOpen()">
-          <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="closeMenu()">Home</a>
+          <a href="#" [class.active]="activeSection() === 'top'" (click)="scrollTo('top', $event)">Home</a>
           <span class="nav-sep" aria-hidden="true">·</span>
-          <a routerLink="/books" routerLinkActive="active" (click)="closeMenu()">Books</a>
+          <a href="#works" [class.active]="activeSection() === 'works'" (click)="scrollTo('works', $event)">Books</a>
           <span class="nav-sep" aria-hidden="true">·</span>
-          <a routerLink="/about" routerLinkActive="active" (click)="closeMenu()">About</a>
+          <a href="#author" [class.active]="activeSection() === 'author'" (click)="scrollTo('author', $event)">About</a>
         </nav>
 
         <button class="nav-toggle" (click)="toggleMenu()" [attr.aria-expanded]="menuOpen()" aria-label="Toggle menu">
@@ -377,8 +377,10 @@ export class App {
   readonly scrolled = signal(false);
   readonly navHidden = signal(false);
   readonly menuOpen = signal(false);
+  readonly activeSection = signal<'top' | 'works' | 'author'>('top');
   private platformId = inject(PLATFORM_ID);
   private document = inject(DOCUMENT);
+  private router = inject(Router);
   private lastScrollY = 0;
 
   constructor() {
@@ -433,6 +435,52 @@ export class App {
       }
 
       this.lastScrollY = Math.max(0, currentY);
+
+      // Smooth section highlighting based on scroll position
+      const worksEl = this.document.getElementById('works');
+      const authorEl = this.document.getElementById('author');
+      const worksTop = worksEl ? worksEl.offsetTop - 180 : Infinity;
+      const authorTop = authorEl ? authorEl.offsetTop - 180 : Infinity;
+
+      if (currentY >= authorTop) {
+        this.activeSection.set('author');
+      } else if (currentY >= worksTop) {
+        this.activeSection.set('works');
+      } else {
+        this.activeSection.set('top');
+      }
+    }
+  }
+
+  scrollTo(targetId: string, event?: Event) {
+    if (event) {
+      event.preventDefault();
+    }
+    this.closeMenu();
+    if (!isPlatformBrowser(this.platformId)) return;
+
+    const windowRef = this.document.defaultView;
+    const currentPath = windowRef?.location.pathname;
+
+    const performScroll = () => {
+      if (targetId === 'top') {
+        windowRef?.scrollTo({ top: 0, behavior: 'smooth' });
+        this.activeSection.set('top');
+      } else {
+        const el = this.document.getElementById(targetId);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          this.activeSection.set(targetId as 'works' | 'author');
+        }
+      }
+    };
+
+    if (currentPath && currentPath !== '/') {
+      this.router.navigateByUrl('/').then(() => {
+        setTimeout(performScroll, 120);
+      });
+    } else {
+      performScroll();
     }
   }
 

@@ -604,13 +604,12 @@ export function initRevealingPoem(
       py >= bookBounds.y &&
       py <= bookBounds.y + bookBounds.h
     ) {
-      const targetUrl = `/books/${bookBounds.slug}`;
-      if (e.metaKey || e.ctrlKey) {
-        window.open(targetUrl, '_blank');
-      } else if (onNavigate) {
+      const targetUrl = '#works';
+      if (onNavigate) {
         onNavigate(targetUrl);
       } else {
-        window.location.href = targetUrl;
+        const el = document.getElementById('works');
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
       }
     }
   };

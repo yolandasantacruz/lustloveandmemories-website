@@ -1,5 +1,11 @@
 import { Component, AfterViewInit, PLATFORM_ID, inject, ChangeDetectionStrategy } from '@angular/core';
 import { isPlatformBrowser, DOCUMENT, NgOptimizedImage } from '@angular/common';
+import { RouteMeta } from '@analogjs/router';
+
+export const routeMeta: RouteMeta = {
+  redirectTo: '/',
+  pathMatch: 'full',
+};
 
 @Component({
   selector: 'app-about',
