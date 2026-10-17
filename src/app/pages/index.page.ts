@@ -148,7 +148,8 @@ import {
         <span class="kicker text-sc">Poetry</span>
         <h2 id="revealH" class="sec-title live">Uncover the Poem</h2>
         <p class="sec-desc text-serif-italic">
-          Move your mouse over to uncover the letters.
+          <span class="desc-desktop">Move your mouse over to uncover the letters.</span>
+          <span class="desc-mobile">Tap to uncover the poem.</span>
         </p>
       </div>
 
@@ -478,7 +479,7 @@ import {
       width: 100%;
       height: auto;
       border-radius: 8px;
-      box-shadow: 0 20px 48px -16px rgba(20, 19, 18, 0.20), 0 4px 12px rgba(20, 19, 18, 0.06);
+      box-shadow: var(--shadow-sheet);
       display: block;
     }
 
@@ -632,7 +633,7 @@ import {
       width: 100%;
       height: auto;
       border-radius: 6px;
-      box-shadow: 0 18px 42px -12px rgba(20, 19, 18, 0.20), 0 4px 12px rgba(20, 19, 18, 0.06);
+      box-shadow: var(--shadow-sheet);
       display: block;
     }
 
@@ -741,6 +742,24 @@ import {
       cursor: url('/images/quill-cursor.png') 0 52, crosshair;
       cursor: -webkit-image-set(url('/images/quill-cursor.png') 1x, url('/images/quill-cursor@2x.png') 2x) 0 52, url('/images/quill-cursor.png') 0 52, crosshair;
       display: block;
+      touch-action: pan-y;
+    }
+
+    .desc-desktop {
+      display: inline;
+    }
+
+    .desc-mobile {
+      display: none;
+    }
+
+    @media (hover: none) and (pointer: coarse) {
+      .desc-desktop {
+        display: none;
+      }
+      .desc-mobile {
+        display: inline;
+      }
     }
 
     /* ─── 6. WRITE A NOTE ─────────────────────────────────────────── */
@@ -776,7 +795,7 @@ import {
       background: var(--paper-sheet);
       padding: clamp(2rem, 4vw, 3rem);
       border-radius: 8px;
-      box-shadow: 0 20px 50px -20px rgba(28, 22, 16, 0.10);
+      box-shadow: var(--shadow-sheet);
       position: relative;
       min-height: 520px;
       display: flex;

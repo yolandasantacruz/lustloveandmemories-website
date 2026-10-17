@@ -140,6 +140,41 @@ function getBookSlug(bookTitle: string): string {
   return 'lust-love-and-memories';
 }
 
+function getEffectiveAttributionDelay(): number {
+  const isGlowActive = POEM_PULSE_CONFIG.enableInternalGlow || POEM_PULSE_CONFIG.enableExternalGlow;
+  const totalPulseMs = isGlowActive ? POEM_PULSE_CONFIG.singlePulseDurationMs * POEM_PULSE_CONFIG.pulseCount : 0;
+  const glowEndMs = isGlowActive ? POEM_PULSE_CONFIG.startDelayMs + totalPulseMs : 0;
+
+  const sunCfg = POEM_PULSE_CONFIG.sunReflection;
+  const sunStartMs = isGlowActive
+    ? glowEndMs + sunCfg.delayAfterGlowMs
+    : sunCfg.startDelayMs;
+  const sunEndMs = sunStartMs + sunCfg.durationMs;
+
+  return Math.max(
+    POEM_PULSE_CONFIG.attributionDelayMs,
+    sunCfg.enabled ? sunEndMs + 250 : glowEndMs + 250
+  );
+}
+
+function getTapBatch(lineIdx: number, totalLines: number, totalTaps: number): number {
+  if (totalLines <= 1 || totalTaps <= 1) return 0;
+  if (totalLines === 2 && totalTaps === 2) {
+    return lineIdx === 0 ? 0 : 1;
+  }
+  if (totalLines === 3 && totalTaps === 3) {
+    return lineIdx;
+  }
+  if (totalLines === 4 && totalTaps === 3) {
+    // 4-line poem in 3 taps:
+    // Line 1 & Line 2 -> Tap 1 (batch 0)
+    // Line 3 -> Tap 2 (batch 1)
+    // Line 4 -> Tap 3 (batch 2)
+    return lineIdx <= 1 ? 0 : lineIdx - 1;
+  }
+  return Math.min(totalTaps - 1, Math.floor((lineIdx * totalTaps) / totalLines));
+}
+
 export function initRevealingPoem(
   cv: HTMLCanvasElement,
   stanzasOrPoems: CuratedPoem[] | string[][] | string[],
@@ -185,6 +220,7 @@ export function initRevealingPoem(
     fontSize: number;
     color: string;
     opacity?: number;
+    tapBatch?: number;
   }
 
   interface BookLinkBounds {
@@ -211,6 +247,8 @@ export function initRevealingPoem(
   let animId = 0;
 
   let currentPoemIdx = 0;
+  let lastLayoutPoemIdx = -1;
+  let tapRevealStep = 0;
   let isFullyRevealed = false;
   let fullyRevealedTime = 0;
   let isFadingOut = false;
@@ -219,6 +257,13 @@ export function initRevealingPoem(
   let lastActivityTime = performance.now();
   let verseBounds = { minX: 0, maxX: 0, minY: 0, maxY: 0 };
   const watermarkEl = cv.parentElement?.querySelector<HTMLElement>('.poem-watermark');
+
+  let isTouchPointer = false;
+  let touchStartX = 0;
+  let touchStartY = 0;
+  let touchStartTime = 0;
+  let touchMovedDistance = 0;
+  let lastTouchHandledTime = 0;
 
   const ptr = { x: -1e4, y: -1e4, px: -1e4, py: -1e4, on: false, hoverBook: false };
 
@@ -238,26 +283,43 @@ export function initRevealingPoem(
     const fontSize = W < 540 ? 27 : W < 768 ? 34 : 41;
     const lineHeight = Math.round(fontSize * 1.72);
 
+    const isNewPoem = currentPoemIdx !== lastLayoutPoemIdx;
+    lastLayoutPoemIdx = currentPoemIdx;
+    if (isNewPoem) {
+      tapRevealStep = 0;
+      isFullyRevealed = prefersReducedMotion;
+      fullyRevealedTime = 0;
+      isFadingOut = false;
+      hasStarted = false;
+    }
+
+    const numPoemLines = activePoem.lines.length;
+    const totalTapsRequired = numPoemLines <= 2 ? 2 : 3;
+
     // Natural responsive word wrapping to prevent text clipping at any screen width
     ctx!.font = `italic ${fontSize}px "EB Garamond", "Iowan Old Style", "Palatino Linotype", "Palatino", Georgia, serif`;
     const maxVerseWidth = Math.max(260, W - 48);
 
-    const verseLines: string[] = [];
-    activePoem.lines.forEach((line) => {
+    interface VerseLineItem {
+      text: string;
+      originalLineIdx: number;
+    }
+    const verseLines: VerseLineItem[] = [];
+    activePoem.lines.forEach((line, originalLineIdx) => {
       const words = line.split(' ');
       let currentLine = '';
       words.forEach((word) => {
         const testLine = currentLine ? `${currentLine} ${word}` : word;
         const testW = ctx!.measureText(testLine).width;
         if (testW > maxVerseWidth && currentLine) {
-          verseLines.push(currentLine);
+          verseLines.push({ text: currentLine, originalLineIdx });
           currentLine = word;
         } else {
           currentLine = testLine;
         }
       });
       if (currentLine) {
-        verseLines.push(currentLine);
+        verseLines.push({ text: currentLine, originalLineIdx });
       }
     });
 
@@ -294,9 +356,9 @@ export function initRevealingPoem(
     const bookChars: CharGlyph[] = [];
 
     // 1. Layout verse lines character-by-character
-    verseLines.forEach((line, lineIdx) => {
+    verseLines.forEach((lineItem, lineIdx) => {
       ctx!.font = `italic ${fontSize}px "EB Garamond", "Iowan Old Style", "Palatino Linotype", "Palatino", Georgia, serif`;
-      const lineWords = line.split(' ');
+      const lineWords = lineItem.text.split(' ');
       const spaceW = Math.max(ctx!.measureText(' ').width, Math.round(fontSize * 0.32));
       let totalLineWidth = 0;
       const wordWidths = lineWords.map((w) => {
@@ -309,6 +371,10 @@ export function initRevealingPoem(
       let currentX = Math.max(16, Math.round((W - totalLineWidth) / 2));
       const y = startY + lineIdx * lineHeight;
 
+      const tapBatch = getTapBatch(lineItem.originalLineIdx, numPoemLines, totalTapsRequired);
+      const isAlreadyRevealedOnResize =
+        !isNewPoem && (isFullyRevealed || (tapRevealStep > 0 && tapBatch < tapRevealStep));
+
       lineWords.forEach((word, wIdx) => {
         const len = word.length;
         for (let i = 0; i < len; i++) {
@@ -317,18 +383,21 @@ export function initRevealingPoem(
           const rightAdv = ctx!.measureText(word.substring(0, i + 1)).width;
           const charW = Math.max(rightAdv - leftAdv, ctx!.measureText(ch).width);
 
+          const shouldBeRevealed = prefersReducedMotion || isAlreadyRevealedOnResize;
+
           chars.push({
             ch,
             x: currentX + leftAdv,
             y,
             w: charW,
-            reveal: prefersReducedMotion ? 1 : 0,
-            targetReveal: prefersReducedMotion ? 1 : 0,
-            revealed: prefersReducedMotion,
+            reveal: shouldBeRevealed ? 1 : 0,
+            targetReveal: shouldBeRevealed ? 1 : 0,
+            revealed: shouldBeRevealed,
             lastTouch: 0,
             isAttribution: false,
             fontSize,
-            color
+            color,
+            tapBatch
           });
         }
         const w = wordWidths.at(wIdx) ?? 40;
@@ -454,10 +523,12 @@ export function initRevealingPoem(
     colorProgress = 0;
     rawLineProgress = 0;
     cv.style.cursor = '';
-    isFullyRevealed = prefersReducedMotion;
-    fullyRevealedTime = 0;
-    isFadingOut = false;
-    hasStarted = false;
+    if (isNewPoem) {
+      isFullyRevealed = prefersReducedMotion;
+      fullyRevealedTime = 0;
+      isFadingOut = false;
+      hasStarted = false;
+    }
 
     // Calculate total content bounds (verse + attribution line) so watermark centers across entirety of content
     let cMinX = Infinity, cMaxX = -Infinity;
@@ -519,8 +590,8 @@ export function initRevealingPoem(
       watermarkEl.style.opacity = finalAlpha.toFixed(4);
     }
 
-    // Precise letter-by-letter quill uncover (no wide radial spill)
-    if (!prefersReducedMotion && ptr.on && !isFadingOut) {
+    // Precise letter-by-letter quill uncover (desktop mouse / pointer hover)
+    if (!prefersReducedMotion && ptr.on && !isFadingOut && !isTouchPointer) {
       lastActivityTime = now;
       const distMoved = Math.hypot(ptr.x - ptr.px, ptr.y - ptr.py);
       const steps = Math.max(1, Math.min(25, Math.ceil(distMoved / 6)));
@@ -584,10 +655,7 @@ export function initRevealingPoem(
     const sunEndMs = sunStartMs + sunCfg.durationMs;
 
     // Effective attribution delay: ensure it blooms after both glow and sun sweep complete
-    const effectiveAttributionDelay = Math.max(
-      POEM_PULSE_CONFIG.attributionDelayMs,
-      sunCfg.enabled ? sunEndMs + 250 : glowEndMs + 250
-    );
+    const effectiveAttributionDelay = getEffectiveAttributionDelay();
 
     // Delay after poem is uncovered before fading in the attribution line (title + book)
     if (isFullyRevealed && !isFadingOut && fullyRevealedTime > 0) {
@@ -828,7 +896,101 @@ export function initRevealingPoem(
   );
   observer.observe(cv);
 
+  function isTouchOnlyDevice(): boolean {
+    const win = cv.ownerDocument?.defaultView;
+    if (win?.matchMedia) {
+      return win.matchMedia('(hover: none) and (pointer: coarse)').matches;
+    }
+    return false;
+  }
+
+  function advanceMobileReveal() {
+    if (isFullyRevealed || isFadingOut) return;
+
+    tapRevealStep++;
+    hasStarted = true;
+    lastActivityTime = performance.now();
+
+    const activePoem = poemsList.at(currentPoemIdx) ?? poemsList.at(0);
+    const numPoemLines = activePoem?.lines.length ?? 3;
+    const totalTapsRequired = numPoemLines <= 2 ? 2 : 3;
+
+    const currentBatchThreshold = tapRevealStep - 1;
+
+    for (const c of chars) {
+      if (c.isAttribution) continue;
+      if (c.tapBatch !== undefined && c.tapBatch <= currentBatchThreshold) {
+        c.targetReveal = 1.0;
+        c.revealed = true;
+        c.lastTouch = performance.now();
+      }
+    }
+
+    if (tapRevealStep >= totalTapsRequired) {
+      for (const c of chars) {
+        if (!c.isAttribution) {
+          c.targetReveal = 1.0;
+          c.revealed = true;
+          c.lastTouch = performance.now();
+        }
+      }
+    }
+
+    if (!running && !prefersReducedMotion) {
+      running = true;
+      animId = requestAnimationFrame(frame);
+    }
+  }
+
+  function handleCanvasInteraction(px: number, py: number, isTouchAction: boolean) {
+    const now = performance.now();
+    const effectiveDelay = getEffectiveAttributionDelay();
+    const isAttributionVisible =
+      prefersReducedMotion ||
+      (isFullyRevealed && fullyRevealedTime > 0 && now - fullyRevealedTime >= effectiveDelay && !isFadingOut);
+
+    // 1. Clicked or tapped on the book title link
+    if (isAttributionVisible && bookBounds) {
+      const isOverBook =
+        px >= bookBounds.x &&
+        px <= bookBounds.x + bookBounds.w &&
+        py >= bookBounds.y &&
+        py <= bookBounds.y + bookBounds.h;
+
+      if (isOverBook) {
+        const targetUrl = '#works';
+        if (onNavigate) {
+          onNavigate(targetUrl);
+        } else {
+          const doc = cv.ownerDocument;
+          const el = doc?.getElementById('works');
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }
+        return;
+      }
+    }
+
+    // 2. If already fully revealed and user taps outside book link after 2s, cycle forward smoothly
+    if (isFullyRevealed && !isFadingOut && fullyRevealedTime > 0 && now - fullyRevealedTime > 2000) {
+      isFadingOut = true;
+      fadeStartTime = now;
+      if (!running && !prefersReducedMotion) {
+        running = true;
+        animId = requestAnimationFrame(frame);
+      }
+      return;
+    }
+
+    // 3. If poem not yet fully revealed, advance reveal on touch interaction or touch-only devices
+    if (!isFullyRevealed && !isFadingOut) {
+      if (isTouchAction || isTouchOnlyDevice()) {
+        advanceMobileReveal();
+      }
+    }
+  }
+
   const onPointerMove = (e: MouseEvent) => {
+    isTouchPointer = false;
     const r = cv.getBoundingClientRect();
     const nx = e.clientX - r.left;
     const ny = e.clientY - r.top;
@@ -842,9 +1004,10 @@ export function initRevealingPoem(
 
     // Check if hovering over the clickable book title link
     const now = performance.now();
+    const effectiveDelay = getEffectiveAttributionDelay();
     const isAttributionVisible =
       prefersReducedMotion ||
-      (isFullyRevealed && fullyRevealedTime > 0 && now - fullyRevealedTime >= 1200 && !isFadingOut);
+      (isFullyRevealed && fullyRevealedTime > 0 && now - fullyRevealedTime >= effectiveDelay && !isFadingOut);
 
     if (isAttributionVisible && bookBounds) {
       const isOverBook =
@@ -878,61 +1041,76 @@ export function initRevealingPoem(
     }
   };
 
+  const onTouchStart = (e: TouchEvent) => {
+    isTouchPointer = true;
+    if (e.touches.length !== 1) return;
+    const t = e.touches.item(0);
+    if (!t) return;
+    touchStartX = t.clientX;
+    touchStartY = t.clientY;
+    touchStartTime = performance.now();
+    touchMovedDistance = 0;
+  };
+
   const onTouchMove = (e: TouchEvent) => {
+    isTouchPointer = true;
     if (!e.touches.length) return;
     const t = e.touches.item(0);
     if (!t) return;
-    const r = cv.getBoundingClientRect();
-    const nx = t.clientX - r.left;
-    const ny = t.clientY - r.top;
-    if (!ptr.on) {
-      ptr.px = nx;
-      ptr.py = ny;
+    const dist = Math.hypot(t.clientX - touchStartX, t.clientY - touchStartY);
+    if (dist > touchMovedDistance) {
+      touchMovedDistance = dist;
     }
-    ptr.x = nx;
-    ptr.y = ny;
-    ptr.on = true;
-    if (!running && !prefersReducedMotion) {
-      running = true;
-      animId = requestAnimationFrame(frame);
+  };
+
+  const onTouchEnd = (e: TouchEvent) => {
+    const now = performance.now();
+    const duration = now - touchStartTime;
+    const r = cv.getBoundingClientRect();
+    const tapX = touchStartX - r.left;
+    const tapY = touchStartY - r.top;
+
+    if (tapX < 0 || tapX > r.width || tapY < 0 || tapY > r.height) {
+      return;
+    }
+
+    const isTap = touchMovedDistance < 16 && duration < 500;
+    const t = e.changedTouches?.item(0);
+    const isHorizontalSwipe =
+      t !== null &&
+      t !== undefined &&
+      Math.abs(t.clientX - touchStartX) > 35 &&
+      Math.abs(t.clientY - touchStartY) < 40 &&
+      duration < 500;
+
+    if (isTap || isHorizontalSwipe) {
+      lastTouchHandledTime = now;
+      handleCanvasInteraction(tapX, tapY, true);
     }
   };
 
   const onClick = (e: MouseEvent) => {
     const now = performance.now();
-    const isAttributionVisible =
-      prefersReducedMotion ||
-      (isFullyRevealed && fullyRevealedTime > 0 && now - fullyRevealedTime >= 1000 && !isFadingOut);
-
-    if (!isAttributionVisible || !bookBounds) return;
+    if (now - lastTouchHandledTime < 450) return;
 
     const r = cv.getBoundingClientRect();
     const px = e.clientX - r.left;
     const py = e.clientY - r.top;
 
-    if (
-      px >= bookBounds.x &&
-      px <= bookBounds.x + bookBounds.w &&
-      py >= bookBounds.y &&
-      py <= bookBounds.y + bookBounds.h
-    ) {
-      const targetUrl = '#works';
-      if (onNavigate) {
-        onNavigate(targetUrl);
-      } else {
-        const el = document.getElementById('works');
-        if (el) el.scrollIntoView({ behavior: 'smooth' });
-      }
-    }
+    handleCanvasInteraction(px, py, false);
   };
 
   cv.addEventListener('mousemove', onPointerMove, { passive: true });
   cv.addEventListener('mouseleave', onPointerLeave);
-  cv.addEventListener('touchstart', onTouchMove, { passive: true });
+  cv.addEventListener('touchstart', onTouchStart, { passive: true });
   cv.addEventListener('touchmove', onTouchMove, { passive: true });
-  cv.addEventListener('touchend', onPointerLeave);
+  cv.addEventListener('touchend', onTouchEnd, { passive: true });
   cv.addEventListener('click', onClick);
-  window.addEventListener('resize', layoutCurrentPoem, { passive: true });
+
+  const win = cv.ownerDocument?.defaultView;
+  if (win) {
+    win.addEventListener('resize', layoutCurrentPoem, { passive: true });
+  }
 
   layoutCurrentPoem();
 
@@ -941,11 +1119,13 @@ export function initRevealingPoem(
     observer.disconnect();
     cv.removeEventListener('mousemove', onPointerMove);
     cv.removeEventListener('mouseleave', onPointerLeave);
-    cv.removeEventListener('touchstart', onTouchMove);
+    cv.removeEventListener('touchstart', onTouchStart);
     cv.removeEventListener('touchmove', onTouchMove);
-    cv.removeEventListener('touchend', onPointerLeave);
+    cv.removeEventListener('touchend', onTouchEnd);
     cv.removeEventListener('click', onClick);
     cv.style.cursor = '';
-    window.removeEventListener('resize', layoutCurrentPoem);
+    if (win) {
+      win.removeEventListener('resize', layoutCurrentPoem);
+    }
   };
 }
