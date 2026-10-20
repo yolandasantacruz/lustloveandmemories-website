@@ -231,7 +231,7 @@ export const routeMeta: RouteMeta = {
       overflow: hidden;
       border: 1px solid var(--border);
       box-shadow: 0 0 0 6px rgba(158,121,57,0.06),
-                  0 20px 48px rgba(20,19,18,0.12);
+                  var(--shadow-sheet);
     }
 
     .bio-portrait__frame img {

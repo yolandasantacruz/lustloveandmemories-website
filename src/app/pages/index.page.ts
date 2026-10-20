@@ -632,7 +632,7 @@ import {
     .book-img {
       width: 100%;
       height: auto;
-      border-radius: 6px;
+      border-radius: 8px;
       box-shadow: var(--shadow-sheet);
       display: block;
     }

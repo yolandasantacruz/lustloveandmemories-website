@@ -110,7 +110,7 @@ export const routeMeta: RouteMeta = {
       width: 100%;
       height: auto;
       border-radius: 4px;
-      box-shadow: 0 16px 40px rgba(20, 19, 18, 0.14), 0 2px 8px rgba(20, 19, 18, 0.06);
+      box-shadow: var(--shadow-sheet);
       display: block;
       border: 1px solid rgba(20, 19, 18, 0.08);
     }

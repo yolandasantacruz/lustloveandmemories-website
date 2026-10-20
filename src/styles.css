@@ -114,6 +114,10 @@ h1, h2, h3, h4, h5, h6 {
   padding-inline: clamp(1.25rem, 5vw, 3rem);
 }
 
+.shadow-sheet {
+  box-shadow: var(--shadow-sheet);
+}
+
 /* ─── Typography Scale ──────────────────────────────────────────── */
 .text-display {
   font-family: var(--font-display);

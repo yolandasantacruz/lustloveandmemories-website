@@ -178,7 +178,7 @@ export const routeMeta: RouteMeta = {
       width: 100%;
       height: auto;
       border-radius: 2px;
-      box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+      box-shadow: var(--shadow-sheet);
       transition: transform var(--dur-slow) var(--ease-out),
                   box-shadow var(--dur-slow) var(--ease-out);
       position: relative;

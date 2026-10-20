@@ -66,7 +66,7 @@ export const routeMeta: RouteMeta = {
       background: var(--paper-sheet);
       padding: var(--sheet-padding-top-bottom) var(--sheet-padding-sides);
       border-radius: 4px;
-      box-shadow: 0 24px 60px -20px rgba(20, 19, 18, 0.08), 0 2px 8px rgba(20, 19, 18, 0.02);
+      box-shadow: var(--shadow-sheet);
       border: none;
     }
 
