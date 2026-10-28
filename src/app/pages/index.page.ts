@@ -13,6 +13,7 @@ import { isPlatformBrowser, DOCUMENT, NgOptimizedImage } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
 import {
   initLetterSea,
+  LETTER_SEA_CONFIG,
   initHeroFigure,
   initRevealingPoem,
   CURATED_POEMS,
@@ -1068,7 +1069,7 @@ export default class HomeComponent {
       // 2. Initialize Hero Ocean Wave of Letters
       const cvSea = this.seaCanvas()?.nativeElement;
       if (cvSea) {
-        initLetterSea(cvSea, prefersRM, '#5c564d');
+        initLetterSea(cvSea, prefersRM, LETTER_SEA_CONFIG.color);
       }
 
       // 3. Initialize Shapes in Text (Morphing Typographic Figures)
