@@ -221,6 +221,7 @@ export function initRevealingPoem(
     color: string;
     opacity?: number;
     tapBatch?: number;
+    revealStartTime?: number;
   }
 
   interface BookLinkBounds {
@@ -237,6 +238,7 @@ export function initRevealingPoem(
   let W = 0;
   let H = 0;
   let dpr = 1;
+  const LITERARY_DISSOLVE_DURATION_MS = 1600;
   let chars: CharGlyph[] = [];
   let bookBounds: BookLinkBounds | null = null;
   let colorProgress = 0;
@@ -577,9 +579,9 @@ export function initRevealingPoem(
       let currentOpacity = POEM_WATERMARK_CONFIG.opacity;
       if (POEM_WATERMARK_CONFIG.dimOnReveal && hasStarted) {
         const verseChars = chars.filter((c) => !c.isAttribution && c.ch.trim().length > 0);
-        const revealedCount = verseChars.filter((c) => c.revealed).length;
+        const totalReveal = verseChars.reduce((sum, c) => sum + c.reveal, 0);
         const totalCount = Math.max(1, verseChars.length);
-        const revealProgress = Math.min(1, revealedCount / totalCount);
+        const revealProgress = Math.min(1, totalReveal / totalCount);
         currentOpacity = lerp(
           POEM_WATERMARK_CONFIG.opacity,
           POEM_WATERMARK_CONFIG.revealedOpacity,
@@ -621,7 +623,7 @@ export function initRevealingPoem(
       ptr.py = ptr.y;
     }
 
-    // Check if entire verse has been uncovered by the user passing the feather over it
+    // Check if entire verse has been uncovered by the user passing the feather over it or tapping through
     if (!isFullyRevealed && !isFadingOut) {
       const verseChars = chars.filter((c) => !c.isAttribution && c.ch.trim().length > 0);
       if (verseChars.length > 0) {
@@ -629,12 +631,19 @@ export function initRevealingPoem(
           (c) => !c.revealed && /\p{L}|\p{N}/u.test(c.ch)
         );
         if (unrevealedLetters.length === 0) {
-          isFullyRevealed = true;
-          fullyRevealedTime = now;
-          // Ensure any remaining punctuation marks within the verse bloom
-          for (const c of verseChars) {
-            c.targetReveal = 1.0;
-            c.revealed = true;
+          const allVerseDissolved = verseChars.every(
+            (c) =>
+              c.reveal >= 0.96 ||
+              (c.revealStartTime !== undefined && now - c.revealStartTime >= LITERARY_DISSOLVE_DURATION_MS)
+          );
+          if (allVerseDissolved) {
+            isFullyRevealed = true;
+            fullyRevealedTime = now;
+            // Ensure any remaining punctuation marks within the verse bloom
+            for (const c of verseChars) {
+              c.targetReveal = 1.0;
+              c.revealed = true;
+            }
           }
         }
       }
@@ -767,9 +776,18 @@ export function initRevealingPoem(
             if (elapsed <= 0) {
               c.reveal = 0;
             } else {
-              const t = Math.min(1, elapsed / 1600);
+              const t = Math.min(1, elapsed / LITERARY_DISSOLVE_DURATION_MS);
               c.reveal = t * (2 - t);
             }
+          }
+        } else if (c.revealStartTime !== undefined && c.revealStartTime > 0) {
+          // Smooth literary dissolve for tapped lines matching attribution timing and ease-out curve
+          const elapsed = now - c.revealStartTime;
+          if (elapsed <= 0) {
+            c.reveal = 0;
+          } else {
+            const t = Math.min(1, elapsed / LITERARY_DISSOLVE_DURATION_MS);
+            c.reveal = Math.max(c.reveal, t * (2 - t));
           }
         } else {
           c.reveal = lerp(c.reveal, c.targetReveal, 0.16);
@@ -920,26 +938,31 @@ export function initRevealingPoem(
     const totalTapsRequired = numPoemLines <= 2 ? 2 : 3;
 
     const currentBatchThreshold = tapRevealStep - 1;
+    const now = performance.now();
 
     for (const c of chars) {
       if (c.isAttribution) continue;
       if (c.tapBatch !== undefined && c.tapBatch <= currentBatchThreshold) {
+        if (!c.revealed || c.revealStartTime === undefined) {
+          c.revealStartTime = now;
+        }
         c.targetReveal = 1.0;
         c.revealed = true;
-        c.lastTouch = performance.now();
+        c.lastTouch = now;
       }
     }
 
     if (tapRevealStep >= totalTapsRequired) {
       for (const c of chars) {
         if (!c.isAttribution) {
+          if (!c.revealed || c.revealStartTime === undefined) {
+            c.revealStartTime = now;
+          }
           c.targetReveal = 1.0;
           c.revealed = true;
-          c.lastTouch = performance.now();
+          c.lastTouch = now;
         }
       }
-      isFullyRevealed = true;
-      fullyRevealedTime = performance.now();
     }
 
     if (!running && !prefersReducedMotion) {
