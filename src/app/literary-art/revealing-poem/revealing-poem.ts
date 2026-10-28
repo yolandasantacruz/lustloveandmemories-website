@@ -896,12 +896,16 @@ export function initRevealingPoem(
   );
   observer.observe(cv);
 
-  function isTouchOnlyDevice(): boolean {
+  function isTouchOrMobileDevice(): boolean {
     const win = cv.ownerDocument?.defaultView;
-    if (win?.matchMedia) {
-      return win.matchMedia('(hover: none) and (pointer: coarse)').matches;
-    }
-    return false;
+    if (!win) return false;
+    const isNarrowScreen = win.innerWidth <= 768;
+    const hasTouch =
+      'ontouchstart' in win ||
+      (win.navigator?.maxTouchPoints ?? 0) > 0 ||
+      win.matchMedia?.('(pointer: coarse)').matches ||
+      win.matchMedia?.('(hover: none)').matches;
+    return Boolean(isNarrowScreen || hasTouch);
   }
 
   function advanceMobileReveal() {
@@ -934,6 +938,8 @@ export function initRevealingPoem(
           c.lastTouch = performance.now();
         }
       }
+      isFullyRevealed = true;
+      fullyRevealedTime = performance.now();
     }
 
     if (!running && !prefersReducedMotion) {
@@ -970,8 +976,8 @@ export function initRevealingPoem(
       }
     }
 
-    // 2. If already fully revealed and user taps outside book link after 2s, cycle forward smoothly
-    if (isFullyRevealed && !isFadingOut && fullyRevealedTime > 0 && now - fullyRevealedTime > 2000) {
+    // 2. If already fully revealed and user taps outside book link after 1.5s, cycle forward smoothly
+    if (isFullyRevealed && !isFadingOut && fullyRevealedTime > 0 && now - fullyRevealedTime > 1500) {
       isFadingOut = true;
       fadeStartTime = now;
       if (!running && !prefersReducedMotion) {
@@ -981,16 +987,19 @@ export function initRevealingPoem(
       return;
     }
 
-    // 3. If poem not yet fully revealed, advance reveal on touch interaction or touch-only devices
+    // 3. If poem not yet fully revealed, advance reveal on touch interaction or mobile devices
     if (!isFullyRevealed && !isFadingOut) {
-      if (isTouchAction || isTouchOnlyDevice()) {
+      if (isTouchAction || isTouchOrMobileDevice()) {
         advanceMobileReveal();
       }
     }
   }
 
   const onPointerMove = (e: MouseEvent) => {
-    isTouchPointer = false;
+    // Suppress synthetic mouse movements generated after a touch tap on mobile
+    if (isTouchPointer || performance.now() - lastTouchHandledTime < 800) {
+      return;
+    }
     const r = cv.getBoundingClientRect();
     const nx = e.clientX - r.left;
     const ny = e.clientY - r.top;
@@ -1070,23 +1079,25 @@ export function initRevealingPoem(
     const tapX = touchStartX - r.left;
     const tapY = touchStartY - r.top;
 
-    if (tapX < 0 || tapX > r.width || tapY < 0 || tapY > r.height) {
-      return;
-    }
-
-    const isTap = touchMovedDistance < 16 && duration < 500;
+    // Generous tap recognition: up to 32px drift (natural finger roll/jitter on Retina) and up to 650ms duration
+    const isTap = touchMovedDistance < 32 && duration < 650;
     const t = e.changedTouches?.item(0);
     const isHorizontalSwipe =
       t !== null &&
       t !== undefined &&
-      Math.abs(t.clientX - touchStartX) > 35 &&
-      Math.abs(t.clientY - touchStartY) < 40 &&
-      duration < 500;
+      Math.abs(t.clientX - touchStartX) > 28 &&
+      Math.abs(t.clientY - touchStartY) < 50 &&
+      duration < 650;
 
     if (isTap || isHorizontalSwipe) {
       lastTouchHandledTime = now;
       handleCanvasInteraction(tapX, tapY, true);
     }
+  };
+
+  const onTouchCancel = () => {
+    touchMovedDistance = 0;
+    touchStartTime = 0;
   };
 
   const onClick = (e: MouseEvent) => {
@@ -1105,7 +1116,26 @@ export function initRevealingPoem(
   cv.addEventListener('touchstart', onTouchStart, { passive: true });
   cv.addEventListener('touchmove', onTouchMove, { passive: true });
   cv.addEventListener('touchend', onTouchEnd, { passive: true });
+  cv.addEventListener('touchcancel', onTouchCancel, { passive: true });
   cv.addEventListener('click', onClick);
+
+  // Extend interaction area to wrapper so taps on parchment padding and watermark trigger reveal
+  const wrapEl = cv.parentElement;
+  const onWrapClick = (e: MouseEvent) => {
+    if (e.target === cv) return;
+    onClick(e);
+  };
+  const onWrapTouchEnd = (e: TouchEvent) => {
+    if (e.target === cv) return;
+    onTouchEnd(e);
+  };
+  if (wrapEl) {
+    wrapEl.addEventListener('click', onWrapClick);
+    wrapEl.addEventListener('touchstart', onTouchStart, { passive: true });
+    wrapEl.addEventListener('touchmove', onTouchMove, { passive: true });
+    wrapEl.addEventListener('touchend', onWrapTouchEnd, { passive: true });
+    wrapEl.addEventListener('touchcancel', onTouchCancel, { passive: true });
+  }
 
   const win = cv.ownerDocument?.defaultView;
   if (win) {
@@ -1122,7 +1152,15 @@ export function initRevealingPoem(
     cv.removeEventListener('touchstart', onTouchStart);
     cv.removeEventListener('touchmove', onTouchMove);
     cv.removeEventListener('touchend', onTouchEnd);
+    cv.removeEventListener('touchcancel', onTouchCancel);
     cv.removeEventListener('click', onClick);
+    if (wrapEl) {
+      wrapEl.removeEventListener('click', onWrapClick);
+      wrapEl.removeEventListener('touchstart', onTouchStart);
+      wrapEl.removeEventListener('touchmove', onTouchMove);
+      wrapEl.removeEventListener('touchend', onWrapTouchEnd);
+      wrapEl.removeEventListener('touchcancel', onTouchCancel);
+    }
     cv.style.cursor = '';
     if (win) {
       win.removeEventListener('resize', layoutCurrentPoem);

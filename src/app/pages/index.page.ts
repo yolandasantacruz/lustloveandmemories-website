@@ -717,6 +717,7 @@ import {
       padding: 0.5rem 1rem 1.35rem;
       background: transparent;
       border-radius: 12px;
+      touch-action: manipulation;
     }
 
     .poem-watermark {
@@ -742,7 +743,7 @@ import {
       cursor: url('/images/quill-cursor.png') 0 52, crosshair;
       cursor: -webkit-image-set(url('/images/quill-cursor.png') 1x, url('/images/quill-cursor@2x.png') 2x) 0 52, url('/images/quill-cursor.png') 0 52, crosshair;
       display: block;
-      touch-action: pan-y;
+      touch-action: manipulation;
     }
 
     .desc-desktop {
@@ -753,7 +754,7 @@ import {
       display: none;
     }
 
-    @media (hover: none) and (pointer: coarse) {
+    @media (max-width: 768px), (hover: none) and (pointer: coarse) {
       .desc-desktop {
         display: none;
       }
