@@ -221,7 +221,6 @@ export function initRevealingPoem(
     color: string;
     opacity?: number;
     tapBatch?: number;
-    revealStartTime?: number;
   }
 
   interface BookLinkBounds {
@@ -238,7 +237,6 @@ export function initRevealingPoem(
   let W = 0;
   let H = 0;
   let dpr = 1;
-  const LITERARY_DISSOLVE_DURATION_MS = 1600;
   let chars: CharGlyph[] = [];
   let bookBounds: BookLinkBounds | null = null;
   let colorProgress = 0;
@@ -579,9 +577,9 @@ export function initRevealingPoem(
       let currentOpacity = POEM_WATERMARK_CONFIG.opacity;
       if (POEM_WATERMARK_CONFIG.dimOnReveal && hasStarted) {
         const verseChars = chars.filter((c) => !c.isAttribution && c.ch.trim().length > 0);
-        const totalReveal = verseChars.reduce((sum, c) => sum + c.reveal, 0);
+        const revealedCount = verseChars.filter((c) => c.revealed).length;
         const totalCount = Math.max(1, verseChars.length);
-        const revealProgress = Math.min(1, totalReveal / totalCount);
+        const revealProgress = Math.min(1, revealedCount / totalCount);
         currentOpacity = lerp(
           POEM_WATERMARK_CONFIG.opacity,
           POEM_WATERMARK_CONFIG.revealedOpacity,
@@ -623,7 +621,7 @@ export function initRevealingPoem(
       ptr.py = ptr.y;
     }
 
-    // Check if entire verse has been uncovered by the user passing the feather over it or tapping through
+    // Check if entire verse has been uncovered by the user passing the feather over it
     if (!isFullyRevealed && !isFadingOut) {
       const verseChars = chars.filter((c) => !c.isAttribution && c.ch.trim().length > 0);
       if (verseChars.length > 0) {
@@ -631,19 +629,12 @@ export function initRevealingPoem(
           (c) => !c.revealed && /\p{L}|\p{N}/u.test(c.ch)
         );
         if (unrevealedLetters.length === 0) {
-          const allVerseDissolved = verseChars.every(
-            (c) =>
-              c.reveal >= 0.96 ||
-              (c.revealStartTime !== undefined && now - c.revealStartTime >= LITERARY_DISSOLVE_DURATION_MS)
-          );
-          if (allVerseDissolved) {
-            isFullyRevealed = true;
-            fullyRevealedTime = now;
-            // Ensure any remaining punctuation marks within the verse bloom
-            for (const c of verseChars) {
-              c.targetReveal = 1.0;
-              c.revealed = true;
-            }
+          isFullyRevealed = true;
+          fullyRevealedTime = now;
+          // Ensure any remaining punctuation marks within the verse bloom
+          for (const c of verseChars) {
+            c.targetReveal = 1.0;
+            c.revealed = true;
           }
         }
       }
@@ -776,18 +767,9 @@ export function initRevealingPoem(
             if (elapsed <= 0) {
               c.reveal = 0;
             } else {
-              const t = Math.min(1, elapsed / LITERARY_DISSOLVE_DURATION_MS);
+              const t = Math.min(1, elapsed / 1600);
               c.reveal = t * (2 - t);
             }
-          }
-        } else if (c.revealStartTime !== undefined && c.revealStartTime > 0) {
-          // Smooth literary dissolve for tapped lines matching attribution timing and ease-out curve
-          const elapsed = now - c.revealStartTime;
-          if (elapsed <= 0) {
-            c.reveal = 0;
-          } else {
-            const t = Math.min(1, elapsed / LITERARY_DISSOLVE_DURATION_MS);
-            c.reveal = Math.max(c.reveal, t * (2 - t));
           }
         } else {
           c.reveal = lerp(c.reveal, c.targetReveal, 0.16);
@@ -914,16 +896,12 @@ export function initRevealingPoem(
   );
   observer.observe(cv);
 
-  function isTouchOrMobileDevice(): boolean {
+  function isTouchOnlyDevice(): boolean {
     const win = cv.ownerDocument?.defaultView;
-    if (!win) return false;
-    const isNarrowScreen = win.innerWidth <= 768;
-    const hasTouch =
-      'ontouchstart' in win ||
-      (win.navigator?.maxTouchPoints ?? 0) > 0 ||
-      win.matchMedia?.('(pointer: coarse)').matches ||
-      win.matchMedia?.('(hover: none)').matches;
-    return Boolean(isNarrowScreen || hasTouch);
+    if (win?.matchMedia) {
+      return win.matchMedia('(hover: none) and (pointer: coarse)').matches;
+    }
+    return false;
   }
 
   function advanceMobileReveal() {
@@ -938,29 +916,22 @@ export function initRevealingPoem(
     const totalTapsRequired = numPoemLines <= 2 ? 2 : 3;
 
     const currentBatchThreshold = tapRevealStep - 1;
-    const now = performance.now();
 
     for (const c of chars) {
       if (c.isAttribution) continue;
       if (c.tapBatch !== undefined && c.tapBatch <= currentBatchThreshold) {
-        if (!c.revealed || c.revealStartTime === undefined) {
-          c.revealStartTime = now;
-        }
         c.targetReveal = 1.0;
         c.revealed = true;
-        c.lastTouch = now;
+        c.lastTouch = performance.now();
       }
     }
 
     if (tapRevealStep >= totalTapsRequired) {
       for (const c of chars) {
         if (!c.isAttribution) {
-          if (!c.revealed || c.revealStartTime === undefined) {
-            c.revealStartTime = now;
-          }
           c.targetReveal = 1.0;
           c.revealed = true;
-          c.lastTouch = now;
+          c.lastTouch = performance.now();
         }
       }
     }
@@ -999,8 +970,8 @@ export function initRevealingPoem(
       }
     }
 
-    // 2. If already fully revealed and user taps outside book link after 1.5s, cycle forward smoothly
-    if (isFullyRevealed && !isFadingOut && fullyRevealedTime > 0 && now - fullyRevealedTime > 1500) {
+    // 2. If already fully revealed and user taps outside book link after 2s, cycle forward smoothly
+    if (isFullyRevealed && !isFadingOut && fullyRevealedTime > 0 && now - fullyRevealedTime > 2000) {
       isFadingOut = true;
       fadeStartTime = now;
       if (!running && !prefersReducedMotion) {
@@ -1010,19 +981,16 @@ export function initRevealingPoem(
       return;
     }
 
-    // 3. If poem not yet fully revealed, advance reveal on touch interaction or mobile devices
+    // 3. If poem not yet fully revealed, advance reveal on touch interaction or touch-only devices
     if (!isFullyRevealed && !isFadingOut) {
-      if (isTouchAction || isTouchOrMobileDevice()) {
+      if (isTouchAction || isTouchOnlyDevice()) {
         advanceMobileReveal();
       }
     }
   }
 
   const onPointerMove = (e: MouseEvent) => {
-    // Suppress synthetic mouse movements generated after a touch tap on mobile
-    if (isTouchPointer || performance.now() - lastTouchHandledTime < 800) {
-      return;
-    }
+    isTouchPointer = false;
     const r = cv.getBoundingClientRect();
     const nx = e.clientX - r.left;
     const ny = e.clientY - r.top;
@@ -1102,25 +1070,23 @@ export function initRevealingPoem(
     const tapX = touchStartX - r.left;
     const tapY = touchStartY - r.top;
 
-    // Generous tap recognition: up to 32px drift (natural finger roll/jitter on Retina) and up to 650ms duration
-    const isTap = touchMovedDistance < 32 && duration < 650;
+    if (tapX < 0 || tapX > r.width || tapY < 0 || tapY > r.height) {
+      return;
+    }
+
+    const isTap = touchMovedDistance < 16 && duration < 500;
     const t = e.changedTouches?.item(0);
     const isHorizontalSwipe =
       t !== null &&
       t !== undefined &&
-      Math.abs(t.clientX - touchStartX) > 28 &&
-      Math.abs(t.clientY - touchStartY) < 50 &&
-      duration < 650;
+      Math.abs(t.clientX - touchStartX) > 35 &&
+      Math.abs(t.clientY - touchStartY) < 40 &&
+      duration < 500;
 
     if (isTap || isHorizontalSwipe) {
       lastTouchHandledTime = now;
       handleCanvasInteraction(tapX, tapY, true);
     }
-  };
-
-  const onTouchCancel = () => {
-    touchMovedDistance = 0;
-    touchStartTime = 0;
   };
 
   const onClick = (e: MouseEvent) => {
@@ -1139,26 +1105,7 @@ export function initRevealingPoem(
   cv.addEventListener('touchstart', onTouchStart, { passive: true });
   cv.addEventListener('touchmove', onTouchMove, { passive: true });
   cv.addEventListener('touchend', onTouchEnd, { passive: true });
-  cv.addEventListener('touchcancel', onTouchCancel, { passive: true });
   cv.addEventListener('click', onClick);
-
-  // Extend interaction area to wrapper so taps on parchment padding and watermark trigger reveal
-  const wrapEl = cv.parentElement;
-  const onWrapClick = (e: MouseEvent) => {
-    if (e.target === cv) return;
-    onClick(e);
-  };
-  const onWrapTouchEnd = (e: TouchEvent) => {
-    if (e.target === cv) return;
-    onTouchEnd(e);
-  };
-  if (wrapEl) {
-    wrapEl.addEventListener('click', onWrapClick);
-    wrapEl.addEventListener('touchstart', onTouchStart, { passive: true });
-    wrapEl.addEventListener('touchmove', onTouchMove, { passive: true });
-    wrapEl.addEventListener('touchend', onWrapTouchEnd, { passive: true });
-    wrapEl.addEventListener('touchcancel', onTouchCancel, { passive: true });
-  }
 
   const win = cv.ownerDocument?.defaultView;
   if (win) {
@@ -1175,15 +1122,7 @@ export function initRevealingPoem(
     cv.removeEventListener('touchstart', onTouchStart);
     cv.removeEventListener('touchmove', onTouchMove);
     cv.removeEventListener('touchend', onTouchEnd);
-    cv.removeEventListener('touchcancel', onTouchCancel);
     cv.removeEventListener('click', onClick);
-    if (wrapEl) {
-      wrapEl.removeEventListener('click', onWrapClick);
-      wrapEl.removeEventListener('touchstart', onTouchStart);
-      wrapEl.removeEventListener('touchmove', onTouchMove);
-      wrapEl.removeEventListener('touchend', onWrapTouchEnd);
-      wrapEl.removeEventListener('touchcancel', onTouchCancel);
-    }
     cv.style.cursor = '';
     if (win) {
       win.removeEventListener('resize', layoutCurrentPoem);

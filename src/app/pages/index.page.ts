@@ -13,7 +13,6 @@ import { isPlatformBrowser, DOCUMENT, NgOptimizedImage } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
 import {
   initLetterSea,
-  LETTER_SEA_CONFIG,
   initHeroFigure,
   initRevealingPoem,
   CURATED_POEMS,
@@ -718,7 +717,6 @@ import {
       padding: 0.5rem 1rem 1.35rem;
       background: transparent;
       border-radius: 12px;
-      touch-action: manipulation;
     }
 
     .poem-watermark {
@@ -744,7 +742,7 @@ import {
       cursor: url('/images/quill-cursor.png') 0 52, crosshair;
       cursor: -webkit-image-set(url('/images/quill-cursor.png') 1x, url('/images/quill-cursor@2x.png') 2x) 0 52, url('/images/quill-cursor.png') 0 52, crosshair;
       display: block;
-      touch-action: manipulation;
+      touch-action: pan-y;
     }
 
     .desc-desktop {
@@ -755,7 +753,7 @@ import {
       display: none;
     }
 
-    @media (max-width: 768px), (hover: none) and (pointer: coarse) {
+    @media (hover: none) and (pointer: coarse) {
       .desc-desktop {
         display: none;
       }
@@ -1069,7 +1067,7 @@ export default class HomeComponent {
       // 2. Initialize Hero Ocean Wave of Letters
       const cvSea = this.seaCanvas()?.nativeElement;
       if (cvSea) {
-        initLetterSea(cvSea, prefersRM, LETTER_SEA_CONFIG.color);
+        initLetterSea(cvSea, prefersRM, '#5c564d');
       }
 
       // 3. Initialize Shapes in Text (Morphing Typographic Figures)
