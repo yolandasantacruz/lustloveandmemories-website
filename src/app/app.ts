@@ -95,9 +95,9 @@ import { filter } from 'rxjs';
       <div class="container footer-inner">
         <div class="footer-row">
           <p class="footer-copy">
-            <span>&copy; {{ year }}, Yolanda Santa Cruz</span>
+            <span class="footer-copy__author">&copy; {{ year }}, Yolanda Santa Cruz</span>
             <span class="footer-sep" aria-hidden="true">&middot;</span>
-            <span>All rights reserved</span>
+            <span class="footer-copy__rights">All rights reserved</span>
           </p>
 
           <div class="footer-links">
@@ -366,6 +366,11 @@ import { filter } from 'rxjs';
       letter-spacing: 0.02em;
     }
 
+    .footer-copy__author,
+    .footer-copy__rights {
+      white-space: nowrap;
+    }
+
     .footer-links {
       display: flex;
       align-items: center;
@@ -429,11 +434,45 @@ import { filter } from 'rxjs';
     }
 
     @media (max-width: 700px) {
+      .site-footer {
+        padding: clamp(2.25rem, 5vh, 2.75rem) 0 2rem;
+      }
+
       .footer-row {
         flex-direction: column;
         align-items: center;
         text-align: center;
-        gap: 1rem;
+        gap: 1.25rem;
+      }
+
+      .footer-copy {
+        flex-direction: column;
+        gap: 0.35rem;
+      }
+
+      .footer-copy .footer-sep {
+        display: none;
+      }
+
+      .footer-copy__author {
+        color: var(--ink-2);
+        font-size: 0.88rem;
+      }
+
+      .footer-copy__rights {
+        color: var(--ink-muted);
+        font-size: 0.78rem;
+        letter-spacing: 0.04em;
+      }
+
+      .footer-links {
+        justify-content: center;
+        gap: 1.1rem;
+        flex-wrap: wrap;
+      }
+
+      .footer-link {
+        padding: 0.25rem 0.35rem;
       }
     }
 
