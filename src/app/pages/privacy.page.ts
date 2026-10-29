@@ -42,7 +42,7 @@ export const routeMeta: RouteMeta = {
     .privacy-page {
       /* ── Sheet Position & Padding Controls ── */
       /* 1. Distance from the top of the browser / header: */
-      --page-top-offset: calc(clamp(7.5rem, 14vh, 10.5rem) + 50px);
+      --page-top-offset: calc(clamp(7.5rem, 14vh, 10.5rem) + 40px);
 
       /* 2. Padding inside the white paper sheet: */
       --sheet-padding-top-bottom: clamp(3rem, 6vw, 6rem);  /* Top & bottom inside white page */
@@ -65,7 +65,7 @@ export const routeMeta: RouteMeta = {
     @media (max-width: 700px) {
       .privacy-page {
         /* Raised by ~26px on mobile so the paper sheet sits closer to the header */
-        --page-top-offset: calc(clamp(7.5rem, 14vh, 10.5rem) + 24px);
+        --page-top-offset: calc(clamp(7.5rem, 14vh, 10.5rem) + 1px);
       }
     }
 
