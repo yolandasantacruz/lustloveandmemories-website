@@ -62,6 +62,13 @@ export const routeMeta: RouteMeta = {
       padding: 0 clamp(1.5rem, 4vw, 3rem); /* Outer margin gutter on narrow screens */
     }
 
+    @media (max-width: 700px) {
+      .privacy-page {
+        /* Raised by ~26px on mobile so the paper sheet sits closer to the header */
+        --page-top-offset: calc(clamp(7.5rem, 14vh, 10.5rem) + 24px);
+      }
+    }
+
     .privacy-page .privacy-article {
       background: var(--paper-sheet);
       padding: var(--sheet-padding-top-bottom) var(--sheet-padding-sides);
